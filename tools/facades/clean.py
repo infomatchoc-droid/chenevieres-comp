@@ -105,6 +105,29 @@ def run(model):
             reps = np.tile(tile, (img.shape[0] // th + 1, img.shape[1] // tw + 1, 1))[:img.shape[0], :img.shape[1]]
             soft = cv2.GaussianBlur(mask.astype(np.float32) / 255, (0, 0), 1.5)[..., None]
             clean = np.clip(clean.astype(np.float32) + reps * soft, 0, 255).astype(np.uint8)
+    hd = cfg.get('header')
+    if hd:
+        # retire le logo de la façade (il est dans la barre du haut) et recale le titre à gauche
+        x0, y0, x1, y1 = hd['erase']
+        hm = np.zeros(img.shape[:2], np.uint8); hm[y0:y1, x0:x1] = 255
+        bg = cv2.inpaint(clean, hm, 7, cv2.INPAINT_TELEA).astype(np.float32)
+        blur = cv2.GaussianBlur(img, (0, 0), 3).astype(np.float32)
+        hf = img.astype(np.float32) - blur
+        sx0, sy0, sx1, sy1 = cfg['texture_sample']
+        tile = hf[sy0:sy1, sx0:sx1]; th, tw = tile.shape[:2]
+        reps = np.tile(tile, (img.shape[0] // th + 1, img.shape[1] // tw + 1, 1))[:img.shape[0], :img.shape[1]]
+        soft = cv2.GaussianBlur(hm.astype(np.float32) / 255, (0, 0), 2)[..., None]
+        bg = bg + reps * soft
+        mv = hd.get('move')
+        if mv:
+            ax0, ay0, ax1, ay1 = mv['rect']; dx = mv['dx']
+            src = img[ay0:ay1, ax0:ax1].astype(np.float32)
+            ref = cv2.inpaint(img, hm, 7, cv2.INPAINT_TELEA)[ay0:ay1, ax0:ax1].astype(np.float32)
+            diff = np.abs(src - ref).max(axis=2)
+            a = np.clip((diff - 18) / 90, 0, 1)[..., None]
+            dst = bg[ay0:ay1, ax0 + dx:ax1 + dx]
+            bg[ay0:ay1, ax0 + dx:ax1 + dx] = dst * (1 - a) + src * a
+        clean = np.clip(bg, 0, 255).astype(np.uint8)
     cv2.imwrite(f'out/{model}/panel.png', clean)
     cv2.imwrite(f'out/{model}/mask.png', mask)
     json.dump(info, open(f'out/{model}/info.json', 'w'), indent=1)
