@@ -51,7 +51,9 @@
      125
     ]
    ],
-   "log": false
+   "log": false,
+   "param": "threshold",
+   "fmt": "{:.1f} dB"
   },
   {
    "id": "ratio",
@@ -81,7 +83,9 @@
      129
     ]
    ],
-   "log": true
+   "log": true,
+   "param": "ratio",
+   "fmt": "{:.1f}:1"
   },
   {
    "id": "attack",
@@ -115,7 +119,9 @@
      115
     ]
    ],
-   "log": true
+   "log": true,
+   "param": "attack",
+   "fmt": "{:.2f} ms"
   },
   {
    "id": "release",
@@ -145,7 +151,14 @@
      61
     ]
    ],
-   "log": true
+   "log": true,
+   "param": "release",
+   "fmt": "{:.2f} s",
+   "map": [
+    0.001,
+    0
+   ],
+   "auto_angle": 113
   },
   {
    "id": "hpf",
@@ -175,7 +188,9 @@
      101
     ]
    ],
-   "log": false
+   "log": false,
+   "param": "schpf",
+   "fmt": "{:.0f} Hz"
   },
   {
    "id": "mix",
@@ -193,7 +208,9 @@
      137
     ]
    ],
-   "log": false
+   "log": false,
+   "param": "mix",
+   "fmt": "{:.0f} %"
   },
   {
    "id": "output",
@@ -223,7 +240,9 @@
      125
     ]
    ],
-   "log": false
+   "log": false,
+   "param": "output",
+   "fmt": "{:+.1f} dB"
   }
  ],
  "meters": [
@@ -396,5 +415,163 @@
    ],
    "dx": -494
   }
- }
+ },
+ "buttons": [
+  {
+   "id": "knee",
+   "param": "knee",
+   "values": [
+    0,
+    6,
+    12
+   ],
+   "labels": [
+    "HARD",
+    "MED",
+    "SOFT"
+   ],
+   "lit_in_source": 1,
+   "rects": [
+    [
+     1189,
+     199,
+     115,
+     58
+    ],
+    [
+     1188,
+     280,
+     117,
+     60
+    ],
+    [
+     1189,
+     361,
+     115,
+     58
+    ]
+   ],
+   "font": 31
+  },
+  {
+   "id": "link",
+   "param": "link",
+   "values": [
+    0,
+    50,
+    100
+   ],
+   "labels": [
+    "OFF",
+    "50%",
+    "100%"
+   ],
+   "lit_in_source": 2,
+   "rects": [
+    [
+     79,
+     565,
+     85,
+     59
+    ],
+    [
+     175,
+     565,
+     84,
+     59
+    ],
+    [
+     269,
+     565,
+     91,
+     61
+    ]
+   ],
+   "font": 30
+  },
+  {
+   "id": "type",
+   "param": "feedback",
+   "values": [
+    0,
+    1
+   ],
+   "labels": [
+    "FEED\nFORWARD",
+    "FEED\nBACK"
+   ],
+   "lit_in_source": 0,
+   "rects": [
+    [
+     411,
+     565,
+     100,
+     62
+    ],
+    [
+     522,
+     565,
+     94,
+     60
+    ]
+   ],
+   "font": 23
+  },
+  {
+   "id": "punch",
+   "param": "punch",
+   "values": [
+    0,
+    1,
+    2,
+    3
+   ],
+   "labels": [
+    "OFF",
+    "LOW",
+    "MED",
+    "HIGH"
+   ],
+   "lit_in_source": 2,
+   "rects": [
+    [
+     932,
+     566,
+     78,
+     57
+    ],
+    [
+     1021,
+     566,
+     78,
+     57
+    ],
+    [
+     1110,
+     565,
+     82,
+     59
+    ],
+    [
+     1203,
+     566,
+     77,
+     57
+    ]
+   ],
+   "font": 30
+  }
+ ],
+ "leds": [
+  {
+   "id": "auto",
+   "param": "autorel",
+   "rect": [
+    1072,
+    336,
+    1146,
+    388
+   ]
+  }
+ ]
 }

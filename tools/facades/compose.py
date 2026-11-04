@@ -3,8 +3,8 @@ import json, math, sys
 import numpy as np
 from PIL import Image, ImageDraw, ImageFont, ImageFilter
 
-F = '/home/claude/work/fonts/RobotoCondensed-%s.ttf'
-EQ = '/home/claude/chenevieres-eq/Resources/'
+F = '../../Resources/fonts/RobotoCondensed-%s.ttf'
+EQ = '../../Resources/'
 
 
 def font(sz, w='700'):

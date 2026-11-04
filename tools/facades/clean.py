@@ -5,6 +5,10 @@ des vu-mètres, et efface les textes à remplacer. Produit :
 """
 import cv2, numpy as np, json, os, sys, math
 
+HERE = os.path.dirname(os.path.abspath(__file__))
+ORIG = os.path.join(HERE, "..", "..", "design", "facades-originales")
+os.chdir(HERE)
+
 def knob_sprite(img, cx, cy, rs, rptr):
     """Capuchon + jupe de rayon rs, pointeur supprimé par interpolation angulaire."""
     pad = 4
@@ -30,19 +34,28 @@ def knob_sprite(img, cx, cy, rs, rptr):
     while dev[(hi + 1) % NA] > thr and (hi - a) < NA // 8: hi += 1
     w = max(hi - lo, 8)
     lo -= int(w * 0.6) + 6; hi += int(w * 0.6) + 6
-    L = hi - lo
-    ia, ib = lo % NA, hi % NA
-    A, B = pol[ia].copy(), pol[ib].copy()
-    for k in range(1, L):
-        t = k / L
-        pol[(lo + k) % NA] = A * (1 - t) + B * t
+    # près du centre, le pointeur occupe un angle plus large : bande élargie rayon par rayon
+    ptr_px = rptr * 0.12
+    for j in range(pol.shape[1]):
+        r = max(j / sc, 1.0)
+        extra = int(min(NA // 4, ptr_px / (2 * math.pi * r) * NA))
+        l2, h2 = lo - extra, hi + extra
+        L = h2 - l2
+        A, B = pol[l2 % NA, j].copy(), pol[h2 % NA, j].copy()
+        for k in range(1, L):
+            t = k / L
+            pol[(l2 + k) % NA, j] = A * (1 - t) + B * t
     out = cv2.warpPolar(pol, (crop.shape[1], crop.shape[0]), c, R,
                         cv2.WARP_POLAR_LINEAR + cv2.INTER_CUBIC + cv2.WARP_INVERSE_MAP)
     # le centre (quelques px) est mal défini en polaire : moyenne locale
     yy, xx = np.mgrid[0:crop.shape[0], 0:crop.shape[1]]
     d = np.hypot(xx - c[0], yy - c[1])
+    ann = (d > rptr * 0.2) & (d < rptr * 0.28)
+    mean = out[ann].mean(axis=0)
+    w = np.clip((d - rptr * 0.13) / (rptr * 0.09), 0, 1)[..., None]
+    out = out * w + mean * (1 - w)
     alpha = np.clip(rs + 0.5 - d, 0, 1)
-    rgba = np.dstack([np.clip(out, 0, 255), alpha * 255]).astype(np.uint8)
+    rgba = np.dstack([np.nan_to_num(np.clip(out, 0, 255)), alpha * 255]).astype(np.uint8)
     angle = (a / NA) * 360.0  # 0 = droite (sens horaire, image)
     return rgba, (c[0], c[1]), math.degrees(math.radians(angle)) + 90  # 0 = haut
 
@@ -64,7 +77,7 @@ def remove_needle(img, mask_poly_pts, pivot, tip, face_rect, dark_thr=90, arc_y=
 
 def run(model):
     cfg = json.load(open(f'layouts/{model}.json'))
-    img = cv2.imread(f'src/{model}.png')
+    img = cv2.imread(os.path.join(ORIG, f'{model}.png'))
     os.makedirs(f'out/{model}', exist_ok=True)
     mask = np.zeros(img.shape[:2], np.uint8)
     info = {}
