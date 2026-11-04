@@ -23,9 +23,10 @@ void EditorContent::resized()
 void EditorContent::openBrowser()
 {
     if (browser) { browser.reset(); return; }
-    browser = std::make_unique<ModelBrowser> (proc, [this] {
-        juce::MessageManager::callAsync ([sp = juce::Component::SafePointer<EditorContent> (this)] {
-            if (sp) { sp->browser.reset(); sp->repaint(); }
+    juce::Component::SafePointer<EditorContent> self (this);
+    browser = std::make_unique<ModelBrowser> (proc, [self] {
+        juce::MessageManager::callAsync ([self] {
+            if (self != nullptr) { self->browser.reset(); self->repaint(); }
         });
     });
     addAndMakeVisible (*browser);
