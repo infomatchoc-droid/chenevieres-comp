@@ -96,46 +96,49 @@ def top_bar(width, h, model_name, model_sub, preset):
         else:
             d.polygon([(x + 21, cy - s), (x + 21, cy + s), (x + 35, cy)], fill=gold)
 
-    x = 28
+    wm = Image.open('../../Resources/wordmark_comp.png')
+    wh = 76; wm = wm.resize((int(wm.width * wh / wm.height), wh), Image.LANCZOS)
+    bar.alpha_composite(wm, (26, cy - wh // 2 + 2))
+    x = 26 + wm.width + 30
     text_c(d, (x, cy - 44), 'MODÈLE', font(19, '600'), (150, 140, 128), 'lm')
     arrow(x, True)
-    box(x + 66, x + 530, outline=(200, 137, 47), wdt=2)
+    box(x + 66, x + 400, outline=(200, 137, 47), wdt=2)
     d.text((x + 92, cy - 4), model_name, font=font(40, '700'), fill=(245, 236, 222), anchor='lm')
     nw = d.textlength(model_name, font=font(40, '700'))
     d.text((x + 92 + nw + 18, cy - 1), model_sub, font=font(22, '500'), fill=(170, 160, 146), anchor='lm')
-    d.polygon([(x + 492, cy - 6), (x + 510, cy - 6), (x + 501, cy + 6)], fill=gold)
-    arrow(x + 542, False)
+    d.polygon([(x + 364, cy - 6), (x + 382, cy - 6), (x + 373, cy + 6)], fill=gold)
+    arrow(x + 412, False)
 
-    x = 690
+    x = x + 412 + 54 + 26
     text_c(d, (x, cy - 44), 'PRESET', font(19, '600'), (150, 140, 128), 'lm')
     arrow(x, True)
-    box(x + 66, x + 420)
-    d.text((x + 88, cy), preset, font=font(30, '500'), fill=(235, 228, 216), anchor='lm')
-    d.polygon([(x + 382, cy - 6), (x + 400, cy - 6), (x + 391, cy + 6)], fill=gold)
-    arrow(x + 432, False)
+    box(x + 66, x + 306)
+    d.text((x + 86, cy), preset, font=font(26, '500'), fill=(235, 228, 216), anchor='lm')
+    d.polygon([(x + 270, cy - 6), (x + 288, cy - 6), (x + 279, cy + 6)], fill=gold)
+    arrow(x + 318, False)
 
-    x = 1220
+    x = x + 318 + 54 + 26
     text_c(d, (x, cy - 44), 'COMPARAISON', font(19, '600'), (150, 140, 128), 'lm')
     box(x, x + 62, fill=(70, 50, 24), outline=gold)
     text_c(d, (x + 31, cy), 'A', font(32), (255, 214, 140))
     box(x + 74, x + 136)
     text_c(d, (x + 105, cy), 'B', font(32), (200, 190, 175))
-    box(x + 148, x + 330)
-    f26 = font(26, '500'); col = (200, 190, 175)
+    box(x + 148, x + 312)
+    f26 = font(24, '500'); col = (200, 190, 175)
     w1 = d.textlength('COPIER A', font=f26); w2 = d.textlength('B', font=f26)
-    tot = w1 + 34 + w2; sx = x + 239 - tot / 2
+    tot = w1 + 34 + w2; sx = x + 230 - tot / 2
     d.text((sx, cy), 'COPIER A', font=f26, fill=col, anchor='lm')
     ax = sx + w1 + 7
     d.line([(ax, cy), (ax + 18, cy)], fill=col, width=3)
     d.polygon([(ax + 14, cy - 6), (ax + 21, cy), (ax + 14, cy + 6)], fill=col)
     d.text((ax + 27, cy), 'B', font=f26, fill=col, anchor='lm')
 
-    x = 1585
-    box(x, x + 170)
-    d.ellipse([x + 20, cy - 8, x + 36, cy + 8], fill=(60, 52, 44), outline=(30, 28, 24))
-    text_c(d, (x + 100, cy), 'BYPASS', font(28, '600'), (190, 180, 165))
+    x = x + 312 + 20
+    box(x, x + 140)
+    d.ellipse([x + 16, cy - 8, x + 32, cy + 8], fill=(60, 52, 44), outline=(30, 28, 24))
+    text_c(d, (x + 82, cy), 'BYPASS', font(26, '600'), (190, 180, 165))
     # réglages
-    x = 1780
+    x = x + 140 + 14
     box(x, x + 70)
     gx, gy = x + 35, cy
     for k in range(8):
@@ -146,7 +149,7 @@ def top_bar(width, h, model_name, model_sub, preset):
     # Pistache
     beagle = Image.open(EQ + 'logo_beagle.png').convert('RGB')
     bh = h - 2
-    bw = int(beagle.width * bh / beagle.height * 1.12)
+    bw = int(beagle.width * bh / beagle.height * 1.04)
     beagle = beagle.resize((bw, bh), Image.LANCZOS)
     m = np.ones((bh, bw), np.float32)
     ramp = np.clip(np.arange(bw) / (bw * 0.22), 0, 1)
