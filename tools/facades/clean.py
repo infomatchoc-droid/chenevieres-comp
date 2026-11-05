@@ -9,17 +9,7 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 ORIG = os.path.join(HERE, "..", "..", "design", "facades-originales")
 os.chdir(HERE)
 
-def knob_sprite(img, cx, cy, rs, rptr):
-    """Capuchon + jupe de rayon rs, pointeur supprimé par interpolation angulaire."""
-    pad = 4
-    R = int(math.ceil(rs)) + pad
-    x0, y0 = int(round(cx)) - R, int(round(cy)) - R
-    crop = img[y0:y0 + 2 * R + 1, x0:x0 + 2 * R + 1].astype(np.float32)
-    c = (cx - x0, cy - y0)
-    NA = 1440
-    pol = cv2.warpPolar(crop, (R * 2, NA), c, R, cv2.WARP_POLAR_LINEAR + cv2.INTER_CUBIC)
-    # pol[angle, radius]; radius index scale = R*2 / R
-    sc = (R * 2) / R
+def remove_band(pol, NA, sc, rptr):
     rr0, rr1 = int(rptr * 0.25 * sc), int(rptr * 0.95 * sc)
     lum = pol[:, rr0:rr1].mean(axis=2)
     med = np.median(lum, axis=0, keepdims=True)
@@ -45,6 +35,23 @@ def knob_sprite(img, cx, cy, rs, rptr):
         for k in range(1, L):
             t = k / L
             pol[(l2 + k) % NA, j] = A * (1 - t) + B * t
+
+    return pol
+
+
+def knob_sprite(img, cx, cy, rs, rptr, bands=1):
+    """Capuchon + jupe de rayon rs, pointeur supprimé par interpolation angulaire."""
+    pad = 4
+    R = int(math.ceil(rs)) + pad
+    x0, y0 = int(round(cx)) - R, int(round(cy)) - R
+    crop = img[y0:y0 + 2 * R + 1, x0:x0 + 2 * R + 1].astype(np.float32)
+    c = (cx - x0, cy - y0)
+    NA = 1440
+    pol = cv2.warpPolar(crop, (R * 2, NA), c, R, cv2.WARP_POLAR_LINEAR + cv2.INTER_CUBIC)
+    # pol[angle, radius]; radius index scale = R*2 / R
+    sc = (R * 2) / R
+    for _ in range(bands):
+        pol = remove_band(pol, NA, sc, rptr)
     out = cv2.warpPolar(pol, (crop.shape[1], crop.shape[0]), c, R,
                         cv2.WARP_POLAR_LINEAR + cv2.INTER_CUBIC + cv2.WARP_INVERSE_MAP)
     # le centre (quelques px) est mal défini en polaire : moyenne locale
@@ -56,8 +63,7 @@ def knob_sprite(img, cx, cy, rs, rptr):
     out = out * w + mean * (1 - w)
     alpha = np.clip(rs + 0.5 - d, 0, 1)
     rgba = np.dstack([np.nan_to_num(np.clip(out, 0, 255)), alpha * 255]).astype(np.uint8)
-    angle = (a / NA) * 360.0  # 0 = droite (sens horaire, image)
-    return rgba, (c[0], c[1]), math.degrees(math.radians(angle)) + 90  # 0 = haut
+    return rgba, (c[0], c[1]), 0.0
 
 
 def remove_needle(img, mask_poly_pts, pivot, tip, face_rect, dark_thr=90, arc_y=0):
@@ -82,7 +88,7 @@ def run(model):
     mask = np.zeros(img.shape[:2], np.uint8)
     info = {}
     for k in cfg['knobs']:
-        rgba, c, ang = knob_sprite(img, k['cx'], k['cy'], k['rs'], k['rptr'])
+        rgba, c, ang = knob_sprite(img, k['cx'], k['cy'], k['rs'], k['rptr'], k.get('bands', 1))
         cv2.imwrite(f"out/{model}/knob_{k['id']}.png", rgba)
         info[k['id']] = {'orig_pointer_deg': ang}
     needle_fill = []
@@ -90,7 +96,7 @@ def run(model):
         if n.get('band'):
             # aiguille repérée par écart au fond lissé du cadran, dans une bande autour de sa position
             band = np.zeros(img.shape[:2], np.uint8)
-            cv2.line(band, tuple(n['needle_from']), tuple(n['needle_to']), 255, 28)
+            cv2.line(band, tuple(n['needle_from']), tuple(n['needle_to']), 255, n.get('band_w', 28))
             if n.get('arc_y'):
                 # au-dessus de l'arc (graduations, chiffres) : bande étroite seulement
                 band[:int(n['arc_y']), :] = 0

@@ -36,9 +36,22 @@ static PanelDef make_fet76()
     return p;
 }
 
+static PanelDef make_opto2a()
+{
+    PanelDef p;
+    p.model = "opto2a"; p.width = 2172; p.height = 724;
+    p.buttons.push_back ({ "mode", "limit", { 0.000f, 1.000f }, { { 1586, 251, 173, 54 }, { 1586, 313, 173, 53 } }, 12, false, {  } });
+    p.knobs.push_back ({ "gain", "output", 293.500f, 401.500f, 111.000f, 231, { { 0.000f, -145.000f }, { 100.000f, 145.000f } }, false, 2.500f, 50.000f, NAN, 10.000f, 82.000f, 8.000f, 0xffefe9dc, "%.0f" });
+    p.knobs.push_back ({ "peak", "threshold", 1306.500f, 397.500f, 113.000f, 235, { { 0.000f, -145.000f }, { 100.000f, 145.000f } }, false, -2.500f, 0.000f, NAN, 10.000f, 84.000f, 8.000f, 0xffefe9dc, "%.0f" });
+    p.knobs.push_back ({ "hpf", "schpf", 1670.500f, 507.500f, 48.000f, 105, { { 0.000f, -135.000f }, { 200.000f, 135.000f } }, false, 1.000f, 0.000f, NAN, 5.000f, 37.000f, 5.000f, 0xffefe9dc, "%.0f Hz" });
+    p.knobs.push_back ({ "mix", "mix", 1958.500f, 395.500f, 73.000f, 155, { { 0.000f, -135.000f }, { 100.000f, 135.000f } }, false, 1.000f, 0.000f, NAN, 8.000f, 56.000f, 6.000f, 0xffefe9dc, "%.0f %%" });
+    p.needles.push_back ({ "grL", 0, 788.000f, 749.000f, 404.000f, { 557, 250, 458, 262 }, { { 20.000f, -25.200f }, { 10.000f, -16.900f }, { 7.000f, -10.800f }, { 5.000f, -4.600f }, { 3.000f, 3.500f }, { 2.000f, 10.100f }, { 1.000f, 16.300f }, { 0.000f, 24.300f } }, "gr" });
+    return p;
+}
+
 static const PanelDef* findPanel (const juce::String& model)
 {
-    static const std::vector<PanelDef> all { make_a2500(), make_fet76() };
+    static const std::vector<PanelDef> all { make_a2500(), make_fet76(), make_opto2a() };
     for (auto& p : all) if (model == p.model) return &p;
     return nullptr;
 }

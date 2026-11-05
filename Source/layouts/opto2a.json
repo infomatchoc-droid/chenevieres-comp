@@ -1,0 +1,206 @@
+{
+ "model": "opto2a",
+ "size": [
+  2172,
+  724
+ ],
+ "controls": [
+  {
+   "type": "buttons",
+   "id": "mode",
+   "param": "limit",
+   "values": [
+    0,
+    1
+   ],
+   "rects": [
+    [
+     1586,
+     251,
+     173,
+     54
+    ],
+    [
+     1586,
+     313,
+     173,
+     53
+    ]
+   ],
+   "glow": 12,
+   "toggle": false,
+   "also": []
+  },
+  {
+   "type": "knob",
+   "id": "gain",
+   "param": "output",
+   "cx": 293.5,
+   "cy": 401.5,
+   "rs": 111,
+   "sprite_w": 231,
+   "cal": [
+    [
+     0,
+     -145
+    ],
+    [
+     100,
+     145
+    ]
+   ],
+   "log": false,
+   "map": [
+    2.5,
+    50
+   ],
+   "auto_angle": null,
+   "ptr_len": 82,
+   "ptr_w": 8,
+   "ptr_colour": "#efe9dc",
+   "fmt": "{:.0f}",
+   "ptr_in": 10
+  },
+  {
+   "type": "knob",
+   "id": "peak",
+   "param": "threshold",
+   "cx": 1306.5,
+   "cy": 397.5,
+   "rs": 113,
+   "sprite_w": 235,
+   "cal": [
+    [
+     0,
+     -145
+    ],
+    [
+     100,
+     145
+    ]
+   ],
+   "log": false,
+   "map": [
+    -2.5,
+    0
+   ],
+   "auto_angle": null,
+   "ptr_len": 84,
+   "ptr_w": 8,
+   "ptr_colour": "#efe9dc",
+   "fmt": "{:.0f}",
+   "ptr_in": 10
+  },
+  {
+   "type": "knob",
+   "id": "hpf",
+   "param": "schpf",
+   "cx": 1670.5,
+   "cy": 507.5,
+   "rs": 48,
+   "sprite_w": 105,
+   "cal": [
+    [
+     0,
+     -135
+    ],
+    [
+     200,
+     135
+    ]
+   ],
+   "log": false,
+   "map": [
+    1,
+    0
+   ],
+   "auto_angle": null,
+   "ptr_len": 37,
+   "ptr_w": 5,
+   "ptr_colour": "#efe9dc",
+   "fmt": "{:.0f} Hz",
+   "ptr_in": 5
+  },
+  {
+   "type": "knob",
+   "id": "mix",
+   "param": "mix",
+   "cx": 1958.5,
+   "cy": 395.5,
+   "rs": 73,
+   "sprite_w": 155,
+   "cal": [
+    [
+     0,
+     -135
+    ],
+    [
+     100,
+     135
+    ]
+   ],
+   "log": false,
+   "map": [
+    1,
+    0
+   ],
+   "auto_angle": null,
+   "ptr_len": 56,
+   "ptr_w": 6,
+   "ptr_colour": "#efe9dc",
+   "fmt": "{:.0f} %",
+   "ptr_in": 8
+  },
+  {
+   "type": "needle",
+   "id": "grL",
+   "pivot": [
+    788,
+    749
+   ],
+   "len": 404,
+   "face": [
+    557,
+    250,
+    1015,
+    512
+   ],
+   "scale": [
+    [
+     20,
+     -25.2
+    ],
+    [
+     10,
+     -16.9
+    ],
+    [
+     7,
+     -10.8
+    ],
+    [
+     5,
+     -4.6
+    ],
+    [
+     3,
+     3.5
+    ],
+    [
+     2,
+     10.1
+    ],
+    [
+     1,
+     16.3
+    ],
+    [
+     0,
+     24.3
+    ]
+   ],
+   "channel": 0,
+   "source": "gr"
+  }
+ ]
+}
