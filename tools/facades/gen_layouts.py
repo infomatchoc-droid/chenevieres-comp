@@ -28,24 +28,26 @@ for path in sorted(glob.glob(os.path.join(SRC, 'layouts', '*.json'))):
         if t == 'knob':
             cal = ', '.join('{ %s, %s }' % (f(a), f(b)) for a, b in c['cal'])
             auto = f(c['auto_angle']) if c.get('auto_angle') is not None else 'NAN'
-            out.append('    p.knobs.push_back ({ "%s", "%s", %s, %s, %s, %d, { %s }, %s, %s, %s, %s, %s, %s, %s, "%s" });' % (
+            out.append('    p.knobs.push_back ({ "%s", "%s", %s, %s, %s, %d, { %s }, %s, %s, %s, %s, %s, %s, %s, %s, "%s" });' % (
                 c['id'], c['param'], f(c['cx']), f(c['cy']), f(c['rs']), c['sprite_w'], cal,
                 'true' if c['log'] else 'false', f(c['map'][0]), f(c['map'][1]), auto,
-                f(c['ptr_len']), f(c['ptr_w']), colour(c['ptr_colour']), c['fmt'].replace('%', '%%').replace('{:', '%').replace('}', '')))
+                f(c.get('ptr_in', c['rs'] * 0.04)), f(c['ptr_len']), f(c['ptr_w']), colour(c['ptr_colour']),
+                c['fmt'].replace('%', '%%').replace('{:', '%').replace('}', '')))
         elif t == 'buttons':
             vals = ', '.join(f(v) for v in c['values'])
             rects = ', '.join('{ %d, %d, %d, %d }' % tuple(r) for r in c['rects'])
-            out.append('    p.buttons.push_back ({ "%s", "%s", { %s }, { %s }, %d });' % (
-                c['id'], c['param'], vals, rects, c['glow']))
+            also = ', '.join('{ "%s", %s }' % (pid, f(v)) for pid, v in c.get('also', []))
+            out.append('    p.buttons.push_back ({ "%s", "%s", { %s }, { %s }, %d, %s, { %s } });' % (
+                c['id'], c['param'], vals, rects, c['glow'], 'true' if c.get('toggle') else 'false', also))
         elif t == 'led':
             r = c['rect']
             out.append('    p.leds.push_back ({ "%s", "%s", { %d, %d, %d, %d } });' % (c['id'], c['param'], r[0], r[1], r[2] - r[0], r[3] - r[1]))
         elif t == 'needle':
-            sc = c['scale']
+            sc = ', '.join('{ %s, %s }' % (f(a), f(b)) for a, b in c['scale'])
             fc = c['face']
-            out.append('    p.needles.push_back ({ "%s", %d, %s, %s, %s, { %d, %d, %d, %d }, %s, %s, %s, %s, "%s" });' % (
+            out.append('    p.needles.push_back ({ "%s", %d, %s, %s, %s, { %d, %d, %d, %d }, { %s }, "%s" });' % (
                 c['id'], c['channel'], f(c['pivot'][0]), f(c['pivot'][1]), f(c['len']),
-                fc[0], fc[1], fc[2] - fc[0], fc[3] - fc[1], f(sc[0][0]), f(sc[0][1]), f(sc[1][0]), f(sc[1][1]), c['source']))
+                fc[0], fc[1], fc[2] - fc[0], fc[3] - fc[1], sc, c['source']))
     out.append('    return p;')
     out.append('}')
     out.append('')

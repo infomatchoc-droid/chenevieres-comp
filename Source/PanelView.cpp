@@ -199,6 +199,7 @@ void PanelView::paint (juce::Graphics& g)
             const float d = std::abs (v[p] - b.values[i]);
             if (d < bestD) { bestD = d; best = (int) i; }
         }
+        if (b.toggle && std::abs (v[p] - b.values[0]) > 0.01f) continue;
         const auto& img = imgs["b_" + juce::String (b.id) + "_" + juce::String (best)];
         const auto r = b.rects[(size_t) best].expanded (b.glow).toFloat();
         g.setOpacity (1.0f);
@@ -215,8 +216,7 @@ void PanelView::paint (juce::Graphics& g)
     for (auto& n : def->needles)
     {
         const float val = needle[n.channel];
-        const float a = juce::jlimit (juce::jmin (n.a0, n.a1), juce::jmax (n.a0, n.a1),
-                                      n.a0 + (val - n.v0) / (n.v1 - n.v0) * (n.a1 - n.a0)) * degToRad;
+        const float a = interp (n.scale, val, false, true) * degToRad;
         juce::Graphics::ScopedSaveState ss (g);
         const auto face = n.face.toFloat();
         g.reduceClipRegion (juce::Rectangle<float> (face.getX() * s, face.getY() * s, face.getWidth() * s, face.getHeight() * s).toNearestInt());
@@ -234,7 +234,7 @@ void PanelView::paint (juce::Graphics& g)
         const float x0 = std::round (k.cx) - std::floor (half), y0 = std::round (k.cy) - std::floor (half);
         g.setOpacity (1.0f);
         g.drawImage (spr, { x0 * s, y0 * s, (float) spr.getWidth() * s, (float) spr.getHeight() * s });
-        drawPointer (g, k.cx * s, k.cy * s, knobAngle (k), k.rs * 0.04f * s, k.ptrLen * s, k.ptrW * s, juce::Colour (k.ptrColour));
+        drawPointer (g, k.cx * s, k.cy * s, knobAngle (k), k.ptrIn * s, k.ptrLen * s, k.ptrW * s, juce::Colour (k.ptrColour));
     }
 
     // bulle de valeur
@@ -321,7 +321,10 @@ void PanelView::mouseDown (const juce::MouseEvent& e)
             const auto r = b.rects[i].toFloat();
             if (juce::Rectangle<float> (r.getX() * s, r.getY() * s, r.getWidth() * s, r.getHeight() * s).contains (e.position))
             {
-                proc.setValue (paramIndex (b.param), b.values[i]);
+                const int p = paramIndex (b.param);
+                if (b.toggle) proc.setValue (p, std::abs (proc.value (p) - b.values[i]) < 0.01f ? spec (p).def : b.values[i]);
+                else proc.setValue (p, b.values[i]);
+                for (auto& [id, val] : b.also) proc.setValue (paramIndex (id), val);
                 repaint();
                 return;
             }

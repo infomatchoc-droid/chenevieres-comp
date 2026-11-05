@@ -10,12 +10,17 @@ struct KnobDef
     std::vector<std::pair<float, float>> cal;   // (valeur affichée, angle en degrés, 0 = haut)
     bool log; float mapA, mapB;                 // affichée = mapA * paramètre + mapB
     float autoAngle;                            // cran AUTO en fin de course (NAN = aucun)
-    float ptrLen, ptrW; juce::uint32 ptrColour;
+    float ptrIn, ptrLen, ptrW; juce::uint32 ptrColour;
     const char* fmt;
 };
-struct ButtonsDef { const char* id; const char* param; std::vector<float> values; std::vector<juce::Rectangle<int>> rects; int glow; };
+struct ButtonsDef
+{
+    const char* id; const char* param; std::vector<float> values; std::vector<juce::Rectangle<int>> rects; int glow;
+    bool toggle;                                          // un seul bouton qui s'allume / s'éteint
+    std::vector<std::pair<const char*, float>> also;      // paramètres remis à une valeur au clic
+};
 struct LedDef { const char* id; const char* param; juce::Rectangle<int> rect; };
-struct NeedleDef { const char* id; int channel; float px, py, len; juce::Rectangle<int> face; float v0, a0, v1, a1; const char* source; };
+struct NeedleDef { const char* id; int channel; float px, py, len; juce::Rectangle<int> face; std::vector<std::pair<float, float>> scale; const char* source; };
 struct PanelDef
 {
     const char* model = ""; int width = 0, height = 0;

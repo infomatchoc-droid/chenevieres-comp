@@ -35,7 +35,8 @@
     ]
    ],
    "glow": 14,
-   "snap": "nearest"
+   "toggle": false,
+   "also": []
   },
   {
    "type": "buttons",
@@ -67,7 +68,8 @@
     ]
    ],
    "glow": 14,
-   "snap": "nearest"
+   "toggle": false,
+   "also": []
   },
   {
    "type": "buttons",
@@ -92,7 +94,8 @@
     ]
    ],
    "glow": 14,
-   "snap": "nearest"
+   "toggle": false,
+   "also": []
   },
   {
    "type": "buttons",
@@ -131,7 +134,8 @@
     ]
    ],
    "glow": 14,
-   "snap": "nearest"
+   "toggle": false,
+   "also": []
   },
   {
    "type": "led",
@@ -200,7 +204,8 @@
    "ptr_len": 75.46,
    "ptr_w": 6.545000000000001,
    "ptr_colour": "#f4f4f6",
-   "fmt": "{:.1f} dB"
+   "fmt": "{:.1f} dB",
+   "ptr_in": 3.08
   },
   {
    "type": "knob",
@@ -241,7 +246,8 @@
    "ptr_len": 66.64,
    "ptr_w": 5.78,
    "ptr_colour": "#f4f4f6",
-   "fmt": "{:.1f}:1"
+   "fmt": "{:.1f}:1",
+   "ptr_in": 2.72
   },
   {
    "type": "knob",
@@ -286,7 +292,8 @@
    "ptr_len": 69.58,
    "ptr_w": 6.035,
    "ptr_colour": "#f4f4f6",
-   "fmt": "{:.2f} ms"
+   "fmt": "{:.2f} ms",
+   "ptr_in": 2.84
   },
   {
    "type": "knob",
@@ -327,7 +334,8 @@
    "ptr_len": 69.58,
    "ptr_w": 6.035,
    "ptr_colour": "#f4f4f6",
-   "fmt": "{:.2f} s"
+   "fmt": "{:.2f} s",
+   "ptr_in": 2.84
   },
   {
    "type": "knob",
@@ -368,7 +376,8 @@
    "ptr_len": 39.2,
    "ptr_w": 3.4000000000000004,
    "ptr_colour": "#f4f4f6",
-   "fmt": "{:.0f} Hz"
+   "fmt": "{:.0f} Hz",
+   "ptr_in": 1.6
   },
   {
    "type": "knob",
@@ -397,7 +406,8 @@
    "ptr_len": 46.06,
    "ptr_w": 3.995,
    "ptr_colour": "#f4f4f6",
-   "fmt": "{:.0f} %"
+   "fmt": "{:.0f} %",
+   "ptr_in": 1.8800000000000001
   },
   {
    "type": "knob",
@@ -438,7 +448,8 @@
    "ptr_len": 46.06,
    "ptr_w": 3.995,
    "ptr_colour": "#f4f4f6",
-   "fmt": "{:+.1f} dB"
+   "fmt": "{:+.1f} dB",
+   "ptr_in": 1.8800000000000001
   },
   {
    "type": "needle",

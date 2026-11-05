@@ -1,0 +1,274 @@
+{
+ "model": "fet76",
+ "size": [
+  2172,
+  724
+ ],
+ "controls": [
+  {
+   "type": "buttons",
+   "id": "ratio",
+   "param": "ratio",
+   "values": [
+    4,
+    8,
+    12,
+    20
+   ],
+   "rects": [
+    [
+     1186,
+     239,
+     103,
+     51
+    ],
+    [
+     1186,
+     315,
+     103,
+     52
+    ],
+    [
+     1186,
+     392,
+     103,
+     51
+    ],
+    [
+     1187,
+     469,
+     101,
+     50
+    ]
+   ],
+   "glow": 14,
+   "toggle": false,
+   "also": [
+    [
+     "fetall",
+     0
+    ]
+   ]
+  },
+  {
+   "type": "buttons",
+   "id": "all",
+   "param": "fetall",
+   "values": [
+    1
+   ],
+   "rects": [
+    [
+     1186,
+     550,
+     103,
+     45
+    ]
+   ],
+   "glow": 14,
+   "toggle": true,
+   "also": []
+  },
+  {
+   "type": "knob",
+   "id": "input",
+   "param": "threshold",
+   "cx": 268.5,
+   "cy": 399.5,
+   "rs": 89,
+   "sprite_w": 187,
+   "cal": [
+    [
+     0,
+     -132
+    ],
+    [
+     36,
+     132
+    ]
+   ],
+   "log": false,
+   "map": [
+    -1,
+    0
+   ],
+   "auto_angle": null,
+   "ptr_len": 80,
+   "ptr_w": 7,
+   "ptr_colour": "#1a1a1c",
+   "fmt": "{:.0f}",
+   "ptr_in": 26.7
+  },
+  {
+   "type": "knob",
+   "id": "output",
+   "param": "output",
+   "cx": 642.5,
+   "cy": 400.5,
+   "rs": 90,
+   "sprite_w": 189,
+   "cal": [
+    [
+     0,
+     -132
+    ],
+    [
+     36,
+     132
+    ]
+   ],
+   "log": false,
+   "map": [
+    1,
+    18
+   ],
+   "auto_angle": null,
+   "ptr_len": 80,
+   "ptr_w": 7,
+   "ptr_colour": "#1a1a1c",
+   "fmt": "{:.0f}",
+   "ptr_in": 27.0
+  },
+  {
+   "type": "knob",
+   "id": "attack",
+   "param": "attack",
+   "cx": 964.5,
+   "cy": 306.5,
+   "rs": 43,
+   "sprite_w": 95,
+   "cal": [
+    [
+     0.8,
+     -135
+    ],
+    [
+     0.02,
+     135
+    ]
+   ],
+   "log": true,
+   "map": [
+    1,
+    0
+   ],
+   "auto_angle": null,
+   "ptr_len": 40,
+   "ptr_w": 4,
+   "ptr_colour": "#1a1a1c",
+   "fmt": "{:.3f} ms",
+   "ptr_in": 12.9
+  },
+  {
+   "type": "knob",
+   "id": "release",
+   "param": "release",
+   "cx": 965.5,
+   "cy": 527.5,
+   "rs": 44,
+   "sprite_w": 97,
+   "cal": [
+    [
+     1100,
+     -135
+    ],
+    [
+     50,
+     135
+    ]
+   ],
+   "log": true,
+   "map": [
+    1,
+    0
+   ],
+   "auto_angle": null,
+   "ptr_len": 41,
+   "ptr_w": 4,
+   "ptr_colour": "#1a1a1c",
+   "fmt": "{:.0f} ms",
+   "ptr_in": 13.2
+  },
+  {
+   "type": "knob",
+   "id": "mix",
+   "param": "mix",
+   "cx": 2012.5,
+   "cy": 392.5,
+   "rs": 43,
+   "sprite_w": 95,
+   "cal": [
+    [
+     0,
+     -140
+    ],
+    [
+     100,
+     140
+    ]
+   ],
+   "log": false,
+   "map": [
+    1,
+    0
+   ],
+   "auto_angle": null,
+   "ptr_len": 40,
+   "ptr_w": 4,
+   "ptr_colour": "#1a1a1c",
+   "fmt": "{:.0f} %",
+   "ptr_in": 12.9
+  },
+  {
+   "type": "needle",
+   "id": "grL",
+   "pivot": [
+    1648,
+    670
+   ],
+   "len": 350,
+   "face": [
+    1430,
+    238,
+    1858,
+    480
+   ],
+   "scale": [
+    [
+     20,
+     -29.0
+    ],
+    [
+     10,
+     -19.5
+    ],
+    [
+     7,
+     -12.3
+    ],
+    [
+     5,
+     -5.0
+    ],
+    [
+     3,
+     4.9
+    ],
+    [
+     2,
+     12.3
+    ],
+    [
+     1,
+     19.3
+    ],
+    [
+     0,
+     27.8
+    ]
+   ],
+   "channel": 0,
+   "source": "gr"
+  }
+ ]
+}

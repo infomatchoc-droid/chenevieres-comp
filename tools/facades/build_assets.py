@@ -60,37 +60,59 @@ def build(model, outdir_res, outdir_layout):
     pil = Image.fromarray(cv2.cvtColor(base, cv2.COLOR_BGR2RGB)).convert('RGBA')
     d = ImageDraw.Draw(pil)
     for t in cfg.get('texts', []):
-        d.text((t['x'], t['y']), t['s'], font=font(t['size'], t.get('w', '700')),
-               fill=tuple(t.get('fill', [232, 232, 234])), anchor=t.get('anchor', 'mm'))
+        f = ImageFont.truetype(os.path.join(HERE, 'fonts', t['font']), t['size']) if 'font' in t else font(t['size'], t.get('w', '700'))
+        col = tuple(t.get('fill', [232, 232, 234]))
+        if 'width' in t:
+            # texte espacé pour tenir exactement dans la largeur voulue (x = bord gauche, y = milieu)
+            chars = list(t['s'])
+            ws = [d.textlength(ch, font=f) for ch in chars]
+            track = (t['width'] - sum(ws)) / max(1, len(chars) - 1)
+            x = t['x']
+            for ch, w in zip(chars, ws):
+                d.text((x, t['y']), ch, font=f, fill=col, anchor='lm')
+                x += w + track
+        else:
+            d.text((t['x'], t['y']), t['s'], font=f, fill=col, anchor=t.get('anchor', 'mm'))
+    # arcs d'échelle à refaire (là où passait l'ancienne aiguille), dessinés en sur-échantillonné
+    for arc in cfg.get('arcs', []):
+        S = 4
+        lay = Image.new('RGBA', (pil.width * S, pil.height * S), (0, 0, 0, 0))
+        r = arc['r'] * S
+        box = [(arc['cx'] * S - r), (arc['cy'] * S - r), (arc['cx'] * S + r), (arc['cy'] * S + r)]
+        # PIL : angles depuis l'axe x, sens horaire ; nos angles : depuis le haut
+        ImageDraw.Draw(lay).arc(box, arc['a0'] - 90, arc['a1'] - 90, fill=tuple(arc['fill']) + (255,), width=int(arc['w'] * S))
+        pil.alpha_composite(lay.resize(pil.size, Image.LANCZOS))
     base = cv2.cvtColor(np.array(pil.convert('RGB')), cv2.COLOR_RGB2BGR)
 
     controls = []
     # 2) boutons lumineux
+    templates = {}
     for grp in cfg.get('buttons', []):
         rects = grp['rects']
-        lit_idx = grp['lit_in_source']
         margin = grp.get('glow', 14)
-        # gabarits sans texte
-        lx, ly, lw, lh = rects[lit_idx]
-        lit_t = erase_text(src[ly:ly + lh, lx:lx + lw].copy(), True)
-        lit_halo = src[ly - margin:ly + lh + margin, lx - margin:lx + lw + margin].copy()
-        unlit_i = next(i for i in range(len(rects)) if i != lit_idx) if len(rects) > 1 else None
-        if unlit_i is not None:
-            ux, uy, uw, uh = rects[unlit_i]
-            unlit_t = erase_text(src[uy:uy + uh, ux:ux + uw].copy(), False)
+        if 'template_group' in grp:
+            lit_t, lit_halo, unlit_t = templates[grp['template_group']]
         else:
-            unlit_t = grp_unlit_from_lit(lit_t)
+            lit_idx = grp['lit_in_source']
+            lx, ly, lw, lh = rects[lit_idx]
+            lit_t = erase_text(src[ly:ly + lh, lx:lx + lw].copy(), True)
+            lit_halo = src[ly - margin:ly + lh + margin, lx - margin:lx + lw + margin].copy()
+            # gabarit éteint : le bouton le plus loin du bouton allumé (sans reflet orange)
+            far = max((j for j in range(len(rects)) if j != lit_idx),
+                      key=lambda j: abs(rects[j][0] - lx) + abs(rects[j][1] - ly), default=None)
+            if far is not None:
+                fx, fy, fw, fh = rects[far]
+                unlit_t = erase_text(src[fy:fy + fh, fx:fx + fw].copy(), False)
+            else:
+                unlit_t = grp_unlit_from_lit(lit_t)
+            templates[grp['id']] = (lit_t, lit_halo, unlit_t)
         # Le groupe entier est reconstruit : fond sans halo, puis tous les boutons éteints reposés
-        # à partir du même gabarit (le plus loin du bouton allumé, sans reflet orange)
-        far = max((j for j in range(len(rects)) if j != lit_idx),
-                  key=lambda j: abs(rects[j][0] - lx) + abs(rects[j][1] - ly), default=None)
-        if far is not None:
-            fx, fy, fw, fh = rects[far]
-            unlit_t = erase_text(src[fy:fy + fh, fx:fx + fw].copy(), False)
         rm = margin + 10
         region = np.zeros((H, W), np.uint8)
         for (ox, oy, ow, oh) in rects:
             cv2.rectangle(region, (ox - rm, oy - rm), (ox + ow + rm, oy + oh + rm), 255, -1)
+        for (px0, py0, px1, py1) in grp.get('protect', []):   # titres à ne pas toucher
+            region[py0:py1, px0:px1] = 0
         hsvb = cv2.cvtColor(base, cv2.COLOR_BGR2HSV)
         white = ((hsvb[..., 2] > 170) & (hsvb[..., 1] < 45)).astype(np.uint8)
         blobs = cv2.morphologyEx(white, cv2.MORPH_OPEN, np.ones((7, 7), np.uint8))
@@ -126,7 +148,7 @@ def build(model, outdir_res, outdir_layout):
         for i, (x, y, w, h) in enumerate(rects):
             label = grp['labels'][i]
             fs = grp.get('font', 30)
-            if i == lit_idx or grp.get('rewrite_all', False) or grp.get('rewrite', [False] * len(rects))[i]:
+            if True:
                 off = cv2.resize(unlit_t, (w, h), interpolation=cv2.INTER_AREA)
                 base[y:y + h, x:x + w] = off
                 tmp = Image.fromarray(cv2.cvtColor(base, cv2.COLOR_BGR2RGB)).convert('RGBA')
@@ -146,7 +168,8 @@ def build(model, outdir_res, outdir_layout):
             name = f"{model}_b_{grp['id']}_{i}.png"
             rgba.save(os.path.join(outdir_res, name))
         controls.append({'type': 'buttons', 'id': grp['id'], 'param': grp['param'], 'values': grp['values'],
-                         'rects': rects, 'glow': margin, 'snap': grp.get('snap', 'nearest')})
+                         'rects': rects, 'glow': margin, 'toggle': grp.get('toggle', False),
+                         'also': grp.get('also', [])})
 
     # 3) voyants : la façade de base les montre éteints
     for led in cfg.get('leds', []):
@@ -170,7 +193,8 @@ def build(model, outdir_res, outdir_layout):
                          'rs': k['rs'], 'sprite_w': spr.width, 'cal': k['cal'], 'log': k.get('log', False),
                          'map': k.get('map', [1, 0]), 'auto_angle': k.get('auto_angle'),
                          'ptr_len': k.get('ptr_len', k['rs'] * 0.98), 'ptr_w': k.get('ptr_w', k['rs'] * 0.085),
-                         'ptr_colour': k.get('ptr_colour', '#f4f4f6'), 'fmt': k.get('fmt', '')})
+                         'ptr_colour': k.get('ptr_colour', '#f4f4f6'), 'fmt': k.get('fmt', ''),
+                         'ptr_in': k.get('ptr_in', k['rs'] * 0.04)})
 
     for m in cfg.get('meters', []):
         controls.append({'type': 'needle', 'id': m['id'], 'pivot': m['pivot'], 'len': m['len'],
