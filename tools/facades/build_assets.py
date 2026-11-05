@@ -101,7 +101,7 @@ def build(model, outdir_res, outdir_layout):
         else:
             lit_idx = grp['lit_in_source']
             lx, ly, lw, lh = rects[lit_idx]
-            lit_t = erase_text(src[ly:ly + lh, lx:lx + lw].copy(), True)
+            lit_t = src[ly:ly + lh, lx:lx + lw].copy() if grp.get('no_erase') else erase_text(src[ly:ly + lh, lx:lx + lw].copy(), True)
             lit_halo = src[ly - margin:ly + lh + margin, lx - margin:lx + lw + margin].copy()
             # gabarit éteint : le bouton le plus loin du bouton allumé (sans reflet orange)
             far = max((j for j in range(len(rects)) if j != lit_idx),

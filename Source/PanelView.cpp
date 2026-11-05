@@ -7,6 +7,18 @@ using namespace comp;
 
 const PanelDef* panelFor (Model m) { return findPanel (info (m).id); }
 
+float PanelView::getV (const char* param) const
+{
+    if (param[0] == '@') { auto it = ui.find (param + 1); return it == ui.end() ? 0.0f : it->second; }
+    return proc.value (paramIndex (param));
+}
+
+void PanelView::setV (const char* param, float v)
+{
+    if (param[0] == '@') { ui[param + 1] = v; return; }
+    proc.setValue (paramIndex (param), v);
+}
+
 static constexpr float degToRad = 0.017453292519943295f;
 
 PanelView::PanelView (CompProcessor& p) : proc (p)
@@ -207,16 +219,16 @@ void PanelView::paint (juce::Graphics& g)
 
     for (auto& b : def->buttons)
     {
-        const int p = paramIndex (b.param);
+        const float cur = getV (b.param);
         int best = 0; float bestD = 1e30f;
         for (size_t i = 0; i < b.values.size(); ++i)
         {
-            const float d = std::abs (v[p] - b.values[i]);
+            const float d = std::abs (cur - b.values[i]);
             if (d < bestD) { bestD = d; best = (int) i; }
         }
         if (b.toggle)
         {
-            const bool lit = std::isnan (b.litAbove) ? std::abs (v[p] - b.values[0]) < 0.01f : v[p] >= b.litAbove;
+            const bool lit = std::isnan (b.litAbove) ? std::abs (cur - b.values[0]) < 0.01f : cur >= b.litAbove;
             if (! lit) continue;
             best = 0;
         }
@@ -235,7 +247,13 @@ void PanelView::paint (juce::Graphics& g)
 
     for (auto& n : def->needles)
     {
-        const float val = needle[n.channel];
+        float val = needle[n.channel];
+        if (std::strcmp (n.source, "sel") == 0)
+        {
+            const int mode = (int) std::lround (getV ("@meter"));
+            if (mode == 1) val = inLvl[n.channel];
+            else if (mode == 2) val = outLvl[n.channel];
+        }
         const float a = interp (n.scale, val, false, true) * degToRad;
         juce::Graphics::ScopedSaveState ss (g);
         const auto face = n.face.toFloat();
@@ -326,6 +344,9 @@ void PanelView::timerCallback()
         const float target = -proc.grDb[c].load();
         const float k = target > needle[c] ? 0.45f : 0.12f;   // inertie d'aiguille (VU)
         needle[c] += k * (target - needle[c]);
+        const float ti = juce::jlimit (0.0f, 40.0f, -proc.inDb[c].load()), to = juce::jlimit (0.0f, 40.0f, -proc.outDb[c].load());
+        inLvl[c] += (ti < inLvl[c] ? 0.45f : 0.12f) * (ti - inLvl[c]);
+        outLvl[c] += (to < outLvl[c] ? 0.45f : 0.12f) * (to - outLvl[c]);
     }
     if (def != nullptr && def->needles.empty() && def->ledbars.empty() && generic.isEmpty()) return;
     repaint();
@@ -352,14 +373,14 @@ void PanelView::mouseDown (const juce::MouseEvent& e)
             const auto r = b.rects[i].toFloat();
             if (juce::Rectangle<float> (r.getX() * s, r.getY() * s, r.getWidth() * s, r.getHeight() * s).contains (e.position))
             {
-                const int p = paramIndex (b.param);
                 if (b.toggle)
                 {
-                    const float cur = proc.value (p);
+                    const float cur = getV (b.param);
                     const bool lit = std::isnan (b.litAbove) ? std::abs (cur - b.values[i]) < 0.01f : cur >= b.litAbove;
-                    proc.setValue (p, lit ? (std::isnan (b.off) ? spec (p).def : b.off) : b.values[i]);
+                    const float off = ! std::isnan (b.off) ? b.off : b.param[0] == '@' ? 0.0f : spec (paramIndex (b.param)).def;
+                    setV (b.param, lit ? off : b.values[i]);
                 }
-                else proc.setValue (p, b.values[i]);
+                else setV (b.param, b.values[i]);
                 for (auto& [id, val] : b.also) proc.setValue (paramIndex (id), val);
                 repaint();
                 return;

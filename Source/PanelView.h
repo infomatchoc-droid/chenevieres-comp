@@ -72,7 +72,10 @@ private:
     const KnobDef* hoverKnob = nullptr;
     float dragAngle = 0;
     juce::Point<float> lastDrag;
-    float needle[2] { 0, 0 };
+    float needle[2] { 0, 0 }, inLvl[2] { 40, 40 }, outLvl[2] { 40, 40 };
+    std::map<juce::String, float> ui;          // réglages d'affichage (« @meter »…), non automatisés
+    float getV (const char* param) const;
+    void setV (const char* param, float v);
 
     // façade générique tant que le visuel n'est pas prêt
     juce::OwnedArray<juce::Slider> generic;
