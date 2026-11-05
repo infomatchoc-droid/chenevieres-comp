@@ -107,6 +107,9 @@ enable_testing()
 add_executable(EngineTest tests/EngineTest.cpp Source/CompEngine.cpp Source/Interpret.cpp)
 add_test(NAME EngineTest COMMAND EngineTest)
 
+# Rendu hors ligne pour les mesures (tools/mesure)
+add_executable(CompRender tests/Render.cpp Source/CompEngine.cpp Source/Interpret.cpp)
+
 # Capture de l'interface (docs/apercu.png) : -DCHNV_TESTS=ON
 option(CHNV_TESTS "Build the snapshot tool" OFF)
 if(CHNV_TESTS)

@@ -1,3 +1,4 @@
 build/
 tools/facades/out/
 tools/facades/src/
+tools/mesure/*.wav

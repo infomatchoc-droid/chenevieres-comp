@@ -1,0 +1,255 @@
+{
+ "fs": 48000,
+ "segments": [
+  {
+   "name": "clic",
+   "start": 24000,
+   "len": 12000
+  },
+  {
+   "name": "clic",
+   "start": 36000,
+   "len": 12000
+  },
+  {
+   "name": "clic",
+   "start": 48000,
+   "len": 12000
+  },
+  {
+   "name": "statique",
+   "start": 108000,
+   "len": 57600,
+   "level": -40
+  },
+  {
+   "name": "statique",
+   "start": 165600,
+   "len": 57600,
+   "level": -38
+  },
+  {
+   "name": "statique",
+   "start": 223200,
+   "len": 57600,
+   "level": -36
+  },
+  {
+   "name": "statique",
+   "start": 280800,
+   "len": 57600,
+   "level": -34
+  },
+  {
+   "name": "statique",
+   "start": 338400,
+   "len": 57600,
+   "level": -32
+  },
+  {
+   "name": "statique",
+   "start": 396000,
+   "len": 57600,
+   "level": -30
+  },
+  {
+   "name": "statique",
+   "start": 453600,
+   "len": 57600,
+   "level": -28
+  },
+  {
+   "name": "statique",
+   "start": 511200,
+   "len": 57600,
+   "level": -26
+  },
+  {
+   "name": "statique",
+   "start": 568800,
+   "len": 57600,
+   "level": -24
+  },
+  {
+   "name": "statique",
+   "start": 626400,
+   "len": 57600,
+   "level": -22
+  },
+  {
+   "name": "statique",
+   "start": 684000,
+   "len": 57600,
+   "level": -20
+  },
+  {
+   "name": "statique",
+   "start": 741600,
+   "len": 57600,
+   "level": -18
+  },
+  {
+   "name": "statique",
+   "start": 799200,
+   "len": 57600,
+   "level": -16
+  },
+  {
+   "name": "statique",
+   "start": 856800,
+   "len": 57600,
+   "level": -14
+  },
+  {
+   "name": "statique",
+   "start": 914400,
+   "len": 57600,
+   "level": -12
+  },
+  {
+   "name": "statique",
+   "start": 972000,
+   "len": 57600,
+   "level": -10
+  },
+  {
+   "name": "statique",
+   "start": 1029600,
+   "len": 57600,
+   "level": -8
+  },
+  {
+   "name": "statique",
+   "start": 1087200,
+   "len": 57600,
+   "level": -6
+  },
+  {
+   "name": "statique",
+   "start": 1144800,
+   "len": 57600,
+   "level": -4
+  },
+  {
+   "name": "temps",
+   "start": 1298400,
+   "len": 264000,
+   "step_up": 48000,
+   "step_down": 120000
+  },
+  {
+   "name": "temps",
+   "start": 1562400,
+   "len": 264000,
+   "step_up": 48000,
+   "step_down": 120000
+  },
+  {
+   "name": "frequence",
+   "start": 1874400,
+   "len": 48000,
+   "freq": 40
+  },
+  {
+   "name": "frequence",
+   "start": 1922400,
+   "len": 48000,
+   "freq": 60
+  },
+  {
+   "name": "frequence",
+   "start": 1970400,
+   "len": 48000,
+   "freq": 100
+  },
+  {
+   "name": "frequence",
+   "start": 2018400,
+   "len": 48000,
+   "freq": 150
+  },
+  {
+   "name": "frequence",
+   "start": 2066400,
+   "len": 48000,
+   "freq": 250
+  },
+  {
+   "name": "frequence",
+   "start": 2114400,
+   "len": 48000,
+   "freq": 500
+  },
+  {
+   "name": "frequence",
+   "start": 2162400,
+   "len": 48000,
+   "freq": 1000
+  },
+  {
+   "name": "frequence",
+   "start": 2210400,
+   "len": 48000,
+   "freq": 2000
+  },
+  {
+   "name": "frequence",
+   "start": 2258400,
+   "len": 48000,
+   "freq": 5000
+  },
+  {
+   "name": "frequence",
+   "start": 2306400,
+   "len": 48000,
+   "freq": 10000
+  },
+  {
+   "name": "harmoniques",
+   "start": 2402400,
+   "len": 96000,
+   "freq": 100,
+   "level": -18
+  },
+  {
+   "name": "harmoniques",
+   "start": 2498400,
+   "len": 96000,
+   "freq": 100,
+   "level": -6
+  },
+  {
+   "name": "harmoniques",
+   "start": 2594400,
+   "len": 96000,
+   "freq": 1000,
+   "level": -18
+  },
+  {
+   "name": "harmoniques",
+   "start": 2690400,
+   "len": 96000,
+   "freq": 1000,
+   "level": -6
+  },
+  {
+   "name": "stereo",
+   "start": 2834400,
+   "len": 120000,
+   "burst": [
+    24000,
+    72000
+   ]
+  },
+  {
+   "name": "rose",
+   "start": 3002400,
+   "len": 288000
+  },
+  {
+   "name": "batterie",
+   "start": 3338400,
+   "len": 288000
+  }
+ ]
+}

@@ -1,0 +1,39 @@
+MESURER UN COMPRESSEUR DE RÉFÉRENCE — Chènevières Comp
+=======================================================
+
+Le fichier Chenevieres-Comp-test.wav (76 secondes, 48 kHz, 24 bits, stéréo) contient des clics de
+synchronisation, des sinus à niveaux croissants, des montées et descentes brusques, des fréquences de 40 Hz à
+10 kHz, du bruit rose et une boucle de batterie. Il sert à mesurer la courbe, les temps, la couleur et le
+couplage stéréo d'un compresseur.
+
+À FAIRE POUR CHAQUE PASSAGE
+- Session à 48 kHz. Le fichier sur une piste stéréo, sans fondu ni normalisation, fader à 0 dB.
+- Le compresseur de référence en insert (matériel ou plugin), réglé comme indiqué plus bas.
+- Exporter / enregistrer la sortie en WAV 24 bits (ou 32 bits flottants), stéréo, toute la durée du fichier.
+  Un peu de silence en plus au début ou à la fin ne gêne pas : l'analyse se cale sur les clics.
+- Matériel : faire d'abord un passage P0 sans le compresseur (simple boucle sortie -> entrée de la carte son),
+  pour mesurer la chaîne elle-même. Garder ensuite les mêmes niveaux de sortie et d'entrée pour tous les passages.
+
+LES PASSAGES (exemple du 2500 ; pour un autre modèle, je donnerai la liste correspondante)
+Réglages communs : Ratio 4:1, Attack 1 ms, Release 0,3 s, Knee HARD, Type FEED FORWARD (« New »),
+Thrust NORM (aucun), Link 100 %, Mix 100 %, gain de sortie 0, seuil réglé pour que les passages forts
+compressent nettement (vers −20 dB sur un plugin ; sur du matériel, ce qui donne 8 à 12 dB de réduction
+sur les sons forts — noter la valeur).
+
+  P1_base.wav       réglages communs
+  P2_soft.wav       Knee SOFT
+  P3_med.wav        Knee MED
+  P4_feedback.wav   Type FEED BACK (« Old »)
+  P5_thrust_med.wav Thrust MED
+  P6_thrust_loud.wav Thrust LOUD
+  P7_lent.wav       Attack 10 ms, Release 1,2 s
+  P8_link0.wav      Link 0 % (ou OFF)
+
+Noter pour chaque passage ce qui diffère éventuellement (seuil exact, appareil, plugin et version).
+
+ANALYSE
+  python3 render.py ch_p1.wav a2500 threshold=-20 ratio=4 attack=1 release=300 knee=0
+  python3 analyse.py --out rapport P1_base.wav="2500 réf." ch_p1.wav="A-2500"
+Le rapport donne pour chaque fichier : seuil, ratio et knee ajustés sur la courbe mesurée, temps d'attaque et
+de relâchement (63 %), réduction selon la fréquence, harmoniques (THD, H2, H3), couplage stéréo, couleur sur
+bruit rose, facteur de crête sur la batterie, plus un graphique (rapport.png) qui superpose les fichiers.
