@@ -62,6 +62,12 @@ def build(model, outdir_res, outdir_layout):
     for t in cfg.get('texts', []):
         f = ImageFont.truetype(os.path.join(HERE, 'fonts', t['font']), t['size']) if 'font' in t else font(t['size'], t.get('w', '700'))
         col = tuple(t.get('fill', [232, 232, 234]))
+        if 'parts' in t:
+            x = t['x']
+            for txt, pc in t['parts']:
+                d.text((x, t['y']), txt, font=f, fill=tuple(pc), anchor='ls')
+                x += d.textlength(txt, font=f)
+            continue
         if 'width' in t:
             # texte espacé pour tenir exactement dans la largeur voulue (x = bord gauche, y = milieu)
             chars = list(t['s'])
@@ -100,7 +106,10 @@ def build(model, outdir_res, outdir_layout):
             # gabarit éteint : le bouton le plus loin du bouton allumé (sans reflet orange)
             far = max((j for j in range(len(rects)) if j != lit_idx),
                       key=lambda j: abs(rects[j][0] - lx) + abs(rects[j][1] - ly), default=None)
-            if far is not None:
+            if 'unlit_rect' in grp:
+                fx, fy, fw, fh = grp['unlit_rect']
+                unlit_t = erase_text(src[fy:fy + fh, fx:fx + fw].copy(), False)
+            elif far is not None:
                 fx, fy, fw, fh = rects[far]
                 unlit_t = erase_text(src[fy:fy + fh, fx:fx + fw].copy(), False)
             else:
@@ -142,21 +151,24 @@ def build(model, outdir_res, outdir_layout):
         sh = cv2.GaussianBlur(sh, (0, 0), 4) * 0.55
         base = (base.astype(np.float32) * (1 - sh[..., None])).astype(np.uint8)
         for (ox, oy, ow, oh) in rects:
-            base[oy:oy + oh, ox:ox + ow] = cv2.resize(unlit_t, (ow, oh), interpolation=cv2.INTER_AREA)
+            base[oy:oy + oh, ox:ox + ow] = nine(unlit_t, ow, oh)
         grp['rewrite_all'] = True
         # chaque bouton : version éteinte dans la façade, version allumée à part
         for i, (x, y, w, h) in enumerate(rects):
             label = grp['labels'][i]
             fs = grp.get('font', 30)
             if True:
-                off = cv2.resize(unlit_t, (w, h), interpolation=cv2.INTER_AREA)
+                off = nine(unlit_t, w, h)
                 base[y:y + h, x:x + w] = off
                 tmp = Image.fromarray(cv2.cvtColor(base, cv2.COLOR_BGR2RGB)).convert('RGBA')
-                draw_label(tmp, (x, y, w, h), label, False, fs)
+                if isinstance(label, dict):
+                    paste_icon(tmp, src, label['icon'], (x, y, w, h), False)
+                else:
+                    draw_label(tmp, (x, y, w, h), label, False, fs)
                 base = cv2.cvtColor(np.array(tmp.convert('RGB')), cv2.COLOR_RGB2BGR)
             # allumé : gabarit allumé + halo
-            on = cv2.resize(lit_halo, (w + 2 * margin, h + 2 * margin), interpolation=cv2.INTER_AREA).astype(np.float32)
-            face = cv2.resize(lit_t, (w, h), interpolation=cv2.INTER_AREA)
+            on = nine(lit_halo, w + 2 * margin, h + 2 * margin, margin + 12).astype(np.float32)
+            face = nine(lit_t, w, h)
             on[margin:margin + h, margin:margin + w] = face
             bg = base[y - margin:y + h + margin, x - margin:x + w + margin].astype(np.float32)
             diff = np.abs(on - bg).max(axis=2)
@@ -164,12 +176,15 @@ def build(model, outdir_res, outdir_layout):
             a[margin:margin + h, margin:margin + w] = 1.0
             rgba = Image.fromarray(np.dstack([cv2.cvtColor(on.clip(0, 255).astype(np.uint8), cv2.COLOR_BGR2RGB),
                                               (a * 255).astype(np.uint8)]), 'RGBA')
-            draw_label(rgba, (margin, margin, w, h), label, True, fs)
+            if isinstance(label, dict):
+                paste_icon(rgba, src, label['icon'], (margin, margin, w, h), True)
+            else:
+                draw_label(rgba, (margin, margin, w, h), label, True, fs)
             name = f"{model}_b_{grp['id']}_{i}.png"
             rgba.save(os.path.join(outdir_res, name))
         controls.append({'type': 'buttons', 'id': grp['id'], 'param': grp['param'], 'values': grp['values'],
                          'rects': rects, 'glow': margin, 'toggle': grp.get('toggle', False),
-                         'also': grp.get('also', [])})
+                         'also': grp.get('also', []), 'off': grp.get('off'), 'lit_above': grp.get('lit_above')})
 
     # 3) voyants : la façade de base les montre éteints
     for led in cfg.get('leds', []):
@@ -185,6 +200,60 @@ def build(model, outdir_res, outdir_layout):
         controls.append({'type': 'led', 'id': led['id'], 'param': led['param'], 'rect': led['rect'],
                          'on_when': led.get('on_when', 1)})
 
+    # 3 bis) barre de LED de réduction de gain : éteintes dans la façade, allumées à part
+    for bar in cfg.get('ledbars', []):
+        r = bar['r']; g = bar.get('glow', 16)
+        leds = []
+        orig = base.copy()
+        full = np.zeros((H, W), np.uint8)
+        for (cx, cy, v) in bar['leds']:
+            cv2.circle(full, (cx, cy), r + g, 255, -1)
+        # le texte au-dessus des LED est protégé
+        for (px0, py0, px1, py1) in bar.get('protect', []):
+            full[py0:py1, px0:px1] = 0
+        base = cv2.inpaint(base, full, 6, cv2.INPAINT_TELEA)
+        # plus de reflet coloré autour des LED : la zone de la barre repasse en gris
+        xs = [l[0] for l in bar['leds']]; ys = [l[1] for l in bar['leds']]
+        m = r + g + 14
+        zx0, zx1, zy0, zy1 = min(xs) - m, max(xs) + m, min(ys) - m, max(ys) + m
+        zone = np.zeros((H, W), np.float32); zone[zy0:zy1, zx0:zx1] = 1
+        for (px0, py0, px1, py1) in bar.get('protect', []):
+            zone[py0:py1, px0:px1] = 0
+        zone = cv2.GaussianBlur(zone, (0, 0), 5)
+        hsvz = cv2.cvtColor(base, cv2.COLOR_BGR2HSV).astype(np.float32)
+        hsvz[..., 1] *= 1 - 0.85 * zone
+        hsvz[..., 2] = hsvz[..., 2] * (1 - zone) + np.minimum(hsvz[..., 2], np.median(hsvz[zy0:zy1, zx0:zx1, 2]) + 6) * zone
+        base = cv2.cvtColor(np.clip(hsvz, 0, 255).astype(np.uint8), cv2.COLOR_HSV2BGR)
+        # LED éteintes dessinées : verre sombre teinté de la couleur de la LED, cerclage noir, petit reflet
+        S = 4
+        pil2 = Image.fromarray(cv2.cvtColor(base, cv2.COLOR_BGR2RGB)).convert('RGBA')
+        lay = Image.new('RGBA', (W * S, H * S), (0, 0, 0, 0))
+        dl = ImageDraw.Draw(lay)
+        for (cx, cy, v) in bar['leds']:
+            col = orig[cy, cx].astype(int)[::-1]          # RGB du centre allumé
+            off = tuple(int(c * 0.15 + 8) for c in col)
+            rr = (r + 2.5) * S
+            dl.ellipse([cx * S - rr, cy * S - rr, cx * S + rr, cy * S + rr], fill=(6, 6, 6, 255))
+            rr = r * S
+            dl.ellipse([cx * S - rr, cy * S - rr, cx * S + rr, cy * S + rr], fill=off + (255,))
+            hr = r * 0.35 * S
+            hx, hy = cx * S - r * 0.35 * S, cy * S - r * 0.4 * S
+            dl.ellipse([hx - hr, hy - hr * 0.7, hx + hr, hy + hr * 0.7], fill=(255, 255, 255, 38))
+        pil2.alpha_composite(lay.resize((W, H), Image.LANCZOS))
+        base = cv2.cvtColor(np.array(pil2.convert('RGB')), cv2.COLOR_RGB2BGR)
+        for i, (cx, cy, v) in enumerate(bar['leds']):
+            R2 = r + g
+            x0, y0 = cx - R2, cy - R2
+            on = orig[y0:y0 + 2 * R2, x0:x0 + 2 * R2].astype(np.float32)
+            off = base[y0:y0 + 2 * R2, x0:x0 + 2 * R2].astype(np.float32)
+            a = np.clip(np.abs(on - off).max(axis=2) / 40, 0, 1)
+            yy, xx = np.mgrid[0:2 * R2, 0:2 * R2]
+            a *= np.clip((R2 - np.hypot(xx - R2, yy - R2)) / 3, 0, 1)
+            rgba = np.dstack([cv2.cvtColor(on.astype(np.uint8), cv2.COLOR_BGR2RGB), (a * 255).astype(np.uint8)])
+            Image.fromarray(rgba, 'RGBA').save(os.path.join(outdir_res, f"{model}_m_{bar['id']}_{i}.png"))
+            leds.append([x0, y0, 2 * R2, 2 * R2, v])
+        controls.append({'type': 'ledbar', 'id': bar['id'], 'channel': bar.get('channel', -1), 'leds': leds})
+
     # 4) boutons rotatifs
     for k in cfg['knobs']:
         spr = Image.open(f"out/{model}/knob_{k['id']}.png")
@@ -194,7 +263,7 @@ def build(model, outdir_res, outdir_layout):
                          'map': k.get('map', [1, 0]), 'auto_angle': k.get('auto_angle'),
                          'ptr_len': k.get('ptr_len', k['rs'] * 0.98), 'ptr_w': k.get('ptr_w', k['rs'] * 0.085),
                          'ptr_colour': k.get('ptr_colour', '#f4f4f6'), 'fmt': k.get('fmt', ''),
-                         'ptr_in': k.get('ptr_in', k['rs'] * 0.04)})
+                         'ptr_in': k.get('ptr_in', k['rs'] * 0.04), 'steps': k.get('steps', [])})
 
     for m in cfg.get('meters', []):
         controls.append({'type': 'needle', 'id': m['id'], 'pivot': m['pivot'], 'len': m['len'],
@@ -204,6 +273,38 @@ def build(model, outdir_res, outdir_layout):
     cv2.imwrite(os.path.join(outdir_res, f'{model}_panel.jpg'), base, [cv2.IMWRITE_JPEG_QUALITY, 90])
     json.dump({'model': model, 'size': [W, H], 'controls': controls}, open(os.path.join(outdir_layout, f'{model}.json'), 'w'), indent=1)
     return base
+
+
+def paste_icon(dst, src, rect, box, lit):
+    """Pictogramme sombre d'un bouton allumé d'origine, recentré dans box (couleur selon l'état)."""
+    x, y, w, h = rect
+    crop = cv2.cvtColor(src[y:y + h, x:x + w], cv2.COLOR_BGR2GRAY).astype(np.float32)
+    med = cv2.medianBlur(src[y:y + h, x:x + w], 2 * (min(w, h) // 3) + 1)
+    gm = cv2.cvtColor(med, cv2.COLOR_BGR2GRAY).astype(np.float32)
+    a = np.clip((gm - crop - 20) / 50, 0, 1)
+    m = max(4, int(min(w, h) * 0.14)); a[:m] = 0; a[-m:] = 0; a[:, :m] = 0; a[:, -m:] = 0
+    col = (43, 24, 4) if lit else (232, 232, 234)
+    icon = Image.fromarray(np.dstack([np.full((h, w), c, np.uint8) for c in col] + [(a * 255).astype(np.uint8)]), 'RGBA')
+    bx, by, bw, bh = box
+    dst.alpha_composite(icon, (int(bx + (bw - w) / 2), int(by + (bh - h) / 2)))
+
+
+def nine(img, w, h, b=12):
+    """Redimensionne un bouton en gardant ses coins et ses bords (9 parties)."""
+    H0, W0 = img.shape[:2]
+    if (W0, H0) == (w, h):
+        return img.copy()
+    b = min(b, W0 // 3, H0 // 3, w // 3, h // 3)
+    xs0, xs1 = [0, b, W0 - b, W0], [0, b, w - b, w]
+    ys0, ys1 = [0, b, H0 - b, H0], [0, b, h - b, h]
+    out = np.zeros((h, w) + img.shape[2:], img.dtype)
+    for i in range(3):
+        for j in range(3):
+            part = img[ys0[i]:ys0[i + 1], xs0[j]:xs0[j + 1]]
+            tw, th = xs1[j + 1] - xs1[j], ys1[i + 1] - ys1[i]
+            if tw > 0 and th > 0:
+                out[ys1[i]:ys1[i + 1], xs1[j]:xs1[j + 1]] = cv2.resize(part, (tw, th), interpolation=cv2.INTER_AREA if tw * th < part.shape[0] * part.shape[1] else cv2.INTER_CUBIC)
+    return out
 
 
 def grp_unlit_from_lit(lit):

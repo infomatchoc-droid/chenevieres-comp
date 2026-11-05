@@ -40,6 +40,9 @@ void PanelView::setModel (Model m)
             for (size_t i = 0; i < b.rects.size(); ++i)
                 imgs["b_" + juce::String (b.id) + "_" + juce::String ((int) i)] = look::image (id + "_b_" + b.id + "_" + juce::String ((int) i) + ".png");
         for (auto& l : def->leds) imgs["l_" + juce::String (l.id)] = look::image (id + "_l_" + l.id + ".png");
+        for (auto& b : def->ledbars)
+            for (size_t i = 0; i < b.leds.size(); ++i)
+                imgs["m_" + juce::String (b.id) + "_" + juce::String ((int) i)] = look::image (id + "_m_" + b.id + "_" + juce::String ((int) i) + ".png");
     }
     else
     {
@@ -105,6 +108,18 @@ static float interp (const std::vector<std::pair<float, float>>& cal, float v, b
     return val (pts.back());
 }
 
+static float snapStep (const KnobDef& k, float disp)
+{
+    if (k.steps.empty()) return disp;
+    float best = k.steps.front(), bestD = 1e30f;
+    for (float st : k.steps)
+    {
+        const float d = (k.log && st > 0 && disp > 0) ? std::abs (std::log (disp) - std::log (st)) : std::abs (disp - st);
+        if (d < bestD) { bestD = d; best = st; }
+    }
+    return best;
+}
+
 static bool knobLogSafe (const KnobDef& k)
 {
     // échelle log seulement si toutes les valeurs sont positives
@@ -116,7 +131,7 @@ float PanelView::knobAngle (const KnobDef& k) const
 {
     const int p = paramIndex (k.param);
     if (! std::isnan (k.autoAngle) && proc.value (pAutoRelease) >= 0.5f) return k.autoAngle;
-    const float disp = k.mapA * proc.value (p) + k.mapB;
+    const float disp = snapStep (k, k.mapA * proc.value (p) + k.mapB);
     return interp (k.cal, disp, knobLogSafe (k), true);
 }
 
@@ -131,7 +146,7 @@ void PanelView::setKnobFromAngle (const KnobDef& k, float angle)
         proc.setValue (pAutoRelease, autoOn ? 1.0f : 0.0f);
         if (autoOn) return;
     }
-    const float disp = interp (k.cal, juce::jlimit (firstA, lastA, angle), knobLogSafe (k), false);
+    const float disp = snapStep (k, interp (k.cal, juce::jlimit (firstA, lastA, angle), knobLogSafe (k), false));
     proc.setValue (p, (disp - k.mapB) / k.mapA);
 }
 
@@ -142,7 +157,7 @@ juce::String PanelView::knobText (const KnobDef& k) const
     float disp = k.mapA * proc.value (p) + k.mapB;
     float lo = 1e9f, hi = -1e9f;
     for (auto& c : k.cal) { lo = juce::jmin (lo, c.first); hi = juce::jmax (hi, c.first); }
-    disp = juce::jlimit (lo, hi, disp);
+    disp = snapStep (k, juce::jlimit (lo, hi, disp));
     if (p == pScHpf && disp < 20.0f) return "OFF";
     return juce::String::formatted (k.fmt, disp).replace ("-", juce::String::fromUTF8 ("\xe2\x88\x92"));
 }
@@ -199,7 +214,12 @@ void PanelView::paint (juce::Graphics& g)
             const float d = std::abs (v[p] - b.values[i]);
             if (d < bestD) { bestD = d; best = (int) i; }
         }
-        if (b.toggle && std::abs (v[p] - b.values[0]) > 0.01f) continue;
+        if (b.toggle)
+        {
+            const bool lit = std::isnan (b.litAbove) ? std::abs (v[p] - b.values[0]) < 0.01f : v[p] >= b.litAbove;
+            if (! lit) continue;
+            best = 0;
+        }
         const auto& img = imgs["b_" + juce::String (b.id) + "_" + juce::String (best)];
         const auto r = b.rects[(size_t) best].expanded (b.glow).toFloat();
         g.setOpacity (1.0f);
@@ -225,6 +245,17 @@ void PanelView::paint (juce::Graphics& g)
         g.drawLine ({ piv.translated (2.0f * s, 1.5f * s), tip.translated (2.0f * s, 1.5f * s) }, 3.0f * s);
         g.setColour (juce::Colour (0xff141210));
         g.drawLine ({ piv, tip }, 3.2f * s);
+    }
+
+    for (auto& lb : def->ledbars)
+    {
+        const float gr = lb.channel < 0 ? juce::jmax (needle[0], needle[1]) : needle[lb.channel];
+        for (size_t i = 0; i < lb.leds.size(); ++i)
+            if (gr >= lb.leds[i].second * 0.92f)
+            {
+                const auto r = lb.leds[i].first.toFloat();
+                g.drawImage (imgs["m_" + juce::String (lb.id) + "_" + juce::String ((int) i)], { r.getX() * s, r.getY() * s, r.getWidth() * s, r.getHeight() * s });
+            }
     }
 
     for (auto& k : def->knobs)
@@ -296,7 +327,7 @@ void PanelView::timerCallback()
         const float k = target > needle[c] ? 0.45f : 0.12f;   // inertie d'aiguille (VU)
         needle[c] += k * (target - needle[c]);
     }
-    if (def != nullptr && def->needles.empty() && generic.isEmpty()) return;
+    if (def != nullptr && def->needles.empty() && def->ledbars.empty() && generic.isEmpty()) return;
     repaint();
 }
 
@@ -322,7 +353,12 @@ void PanelView::mouseDown (const juce::MouseEvent& e)
             if (juce::Rectangle<float> (r.getX() * s, r.getY() * s, r.getWidth() * s, r.getHeight() * s).contains (e.position))
             {
                 const int p = paramIndex (b.param);
-                if (b.toggle) proc.setValue (p, std::abs (proc.value (p) - b.values[i]) < 0.01f ? spec (p).def : b.values[i]);
+                if (b.toggle)
+                {
+                    const float cur = proc.value (p);
+                    const bool lit = std::isnan (b.litAbove) ? std::abs (cur - b.values[i]) < 0.01f : cur >= b.litAbove;
+                    proc.setValue (p, lit ? (std::isnan (b.off) ? spec (p).def : b.off) : b.values[i]);
+                }
                 else proc.setValue (p, b.values[i]);
                 for (auto& [id, val] : b.also) proc.setValue (paramIndex (id), val);
                 repaint();

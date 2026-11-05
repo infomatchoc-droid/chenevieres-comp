@@ -100,7 +100,10 @@ void TopBar::paint (juce::Graphics& g)
         g.drawText (mi.name, r, juce::Justification::centredLeft);
         g.setColour (look::textDim);
         g.setFont (look::font (11.0f, 500));
-        g.drawText (juce::String::fromUTF8 (mi.subtitle), r.withTrimmedLeft (nw + 8).withTrimmedRight (14), juce::Justification::centredLeft);
+        const auto sub = juce::String::fromUTF8 (mi.subtitle);
+        const auto subArea = r.withTrimmedLeft (nw + 8).withTrimmedRight (14);
+        if (juce::GlyphArrangement::getStringWidth (g.getCurrentFont(), sub) <= subArea.getWidth())
+            g.drawText (sub, subArea, juce::Justification::centredLeft);
         caret (g, zones[ModelBox].getRight() - 13, zones[ModelBox].getCentreY());
     }
     arrow (g, zones[ModelNext], false, hover == ModelNext);

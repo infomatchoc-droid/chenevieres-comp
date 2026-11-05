@@ -28,17 +28,23 @@ for path in sorted(glob.glob(os.path.join(SRC, 'layouts', '*.json'))):
         if t == 'knob':
             cal = ', '.join('{ %s, %s }' % (f(a), f(b)) for a, b in c['cal'])
             auto = f(c['auto_angle']) if c.get('auto_angle') is not None else 'NAN'
-            out.append('    p.knobs.push_back ({ "%s", "%s", %s, %s, %s, %d, { %s }, %s, %s, %s, %s, %s, %s, %s, %s, "%s" });' % (
+            steps = ', '.join(f(v) for v in c.get('steps', []))
+            out.append('    p.knobs.push_back ({ "%s", "%s", %s, %s, %s, %d, { %s }, %s, %s, %s, %s, %s, %s, %s, %s, "%s", { %s } });' % (
                 c['id'], c['param'], f(c['cx']), f(c['cy']), f(c['rs']), c['sprite_w'], cal,
                 'true' if c['log'] else 'false', f(c['map'][0]), f(c['map'][1]), auto,
                 f(c.get('ptr_in', c['rs'] * 0.04)), f(c['ptr_len']), f(c['ptr_w']), colour(c['ptr_colour']),
-                c['fmt'].replace('%', '%%').replace('{:', '%').replace('}', '')))
+                c['fmt'].replace('%', '%%').replace('{:', '%').replace('}', ''), steps))
         elif t == 'buttons':
             vals = ', '.join(f(v) for v in c['values'])
             rects = ', '.join('{ %d, %d, %d, %d }' % tuple(r) for r in c['rects'])
             also = ', '.join('{ "%s", %s }' % (pid, f(v)) for pid, v in c.get('also', []))
-            out.append('    p.buttons.push_back ({ "%s", "%s", { %s }, { %s }, %d, %s, { %s } });' % (
-                c['id'], c['param'], vals, rects, c['glow'], 'true' if c.get('toggle') else 'false', also))
+            nan = lambda v: 'NAN' if v is None else f(v)
+            out.append('    p.buttons.push_back ({ "%s", "%s", { %s }, { %s }, %d, %s, { %s }, %s, %s });' % (
+                c['id'], c['param'], vals, rects, c['glow'], 'true' if c.get('toggle') else 'false', also,
+                nan(c.get('off')), nan(c.get('lit_above'))))
+        elif t == 'ledbar':
+            leds = ', '.join('{ { %d, %d, %d, %d }, %s }' % (x, y, w, h, f(v)) for x, y, w, h, v in c['leds'])
+            out.append('    p.ledbars.push_back ({ "%s", %d, { %s } });' % (c['id'], c['channel'], leds))
         elif t == 'led':
             r = c['rect']
             out.append('    p.leds.push_back ({ "%s", "%s", { %d, %d, %d, %d } });' % (c['id'], c['param'], r[0], r[1], r[2] - r[0], r[3] - r[1]))

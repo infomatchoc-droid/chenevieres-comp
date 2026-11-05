@@ -1,0 +1,550 @@
+{
+ "model": "buscompg",
+ "size": [
+  2172,
+  724
+ ],
+ "controls": [
+  {
+   "type": "buttons",
+   "id": "comp",
+   "param": "bypass",
+   "values": [
+    0
+   ],
+   "rects": [
+    [
+     254,
+     576,
+     107,
+     51
+    ]
+   ],
+   "glow": 14,
+   "toggle": true,
+   "also": [],
+   "off": 1,
+   "lit_above": null
+  },
+  {
+   "type": "buttons",
+   "id": "hpfb",
+   "param": "schpf",
+   "values": [
+    80
+   ],
+   "rects": [
+    [
+     593,
+     577,
+     100,
+     48
+    ]
+   ],
+   "glow": 14,
+   "toggle": true,
+   "also": [],
+   "off": 0,
+   "lit_above": 20
+  },
+  {
+   "type": "buttons",
+   "id": "link",
+   "param": "link",
+   "values": [
+    100
+   ],
+   "rects": [
+    [
+     1092,
+     576,
+     106,
+     52
+    ]
+   ],
+   "glow": 14,
+   "toggle": true,
+   "also": [],
+   "off": 0,
+   "lit_above": null
+  },
+  {
+   "type": "buttons",
+   "id": "scext",
+   "param": "scext",
+   "values": [
+    1
+   ],
+   "rects": [
+    [
+     1246,
+     577,
+     128,
+     48
+    ]
+   ],
+   "glow": 14,
+   "toggle": true,
+   "also": [],
+   "off": 0,
+   "lit_above": null
+  },
+  {
+   "type": "buttons",
+   "id": "autogain",
+   "param": "autogain",
+   "values": [
+    1
+   ],
+   "rects": [
+    [
+     1456,
+     577,
+     171,
+     48
+    ]
+   ],
+   "glow": 14,
+   "toggle": true,
+   "also": [],
+   "off": 0,
+   "lit_above": null
+  },
+  {
+   "type": "ledbar",
+   "id": "gr",
+   "channel": -1,
+   "leds": [
+    [
+     1027,
+     73,
+     64,
+     64,
+     30
+    ],
+    [
+     1078,
+     73,
+     64,
+     64,
+     26
+    ],
+    [
+     1129,
+     73,
+     64,
+     64,
+     23
+    ],
+    [
+     1180,
+     73,
+     64,
+     64,
+     20
+    ],
+    [
+     1230,
+     73,
+     64,
+     64,
+     17
+    ],
+    [
+     1280,
+     73,
+     64,
+     64,
+     14
+    ],
+    [
+     1328,
+     73,
+     64,
+     64,
+     12
+    ],
+    [
+     1378,
+     73,
+     64,
+     64,
+     10
+    ],
+    [
+     1427,
+     73,
+     64,
+     64,
+     8
+    ],
+    [
+     1475,
+     72,
+     64,
+     64,
+     6
+    ],
+    [
+     1524,
+     72,
+     64,
+     64,
+     4
+    ],
+    [
+     1572,
+     72,
+     64,
+     64,
+     3
+    ],
+    [
+     1620,
+     73,
+     64,
+     64,
+     2
+    ],
+    [
+     1669,
+     73,
+     64,
+     64,
+     1
+    ]
+   ]
+  },
+  {
+   "type": "knob",
+   "id": "threshold",
+   "param": "threshold",
+   "cx": 299.5,
+   "cy": 340.5,
+   "rs": 86,
+   "sprite_w": 181,
+   "cal": [
+    [
+     -20,
+     -147
+    ],
+    [
+     -16,
+     -122
+    ],
+    [
+     -12,
+     -93
+    ],
+    [
+     -8,
+     -66
+    ],
+    [
+     -4,
+     -36
+    ],
+    [
+     0,
+     1
+    ],
+    [
+     4,
+     38
+    ],
+    [
+     8,
+     68
+    ],
+    [
+     12,
+     94
+    ],
+    [
+     16,
+     122
+    ],
+    [
+     20,
+     141
+    ]
+   ],
+   "log": false,
+   "map": [
+    1,
+    20
+   ],
+   "auto_angle": null,
+   "ptr_len": 70,
+   "ptr_w": 7,
+   "ptr_colour": "#1c1b1a",
+   "fmt": "{:+.0f} dB",
+   "ptr_in": 6,
+   "steps": []
+  },
+  {
+   "type": "knob",
+   "id": "ratio",
+   "param": "ratio",
+   "cx": 643,
+   "cy": 349,
+   "rs": 80,
+   "sprite_w": 169,
+   "cal": [
+    [
+     2,
+     -123
+    ],
+    [
+     3,
+     -58
+    ],
+    [
+     4,
+     1
+    ],
+    [
+     6,
+     58
+    ],
+    [
+     10,
+     122
+    ]
+   ],
+   "log": true,
+   "map": [
+    1,
+    0
+   ],
+   "auto_angle": null,
+   "ptr_len": 64,
+   "ptr_w": 7,
+   "ptr_colour": "#1c1b1a",
+   "fmt": "{:.0f}:1",
+   "ptr_in": 6,
+   "steps": [
+    2,
+    3,
+    4,
+    6,
+    10
+   ]
+  },
+  {
+   "type": "knob",
+   "id": "attack",
+   "param": "attack",
+   "cx": 960,
+   "cy": 348,
+   "rs": 82,
+   "sprite_w": 173,
+   "cal": [
+    [
+     0.1,
+     -126
+    ],
+    [
+     0.3,
+     -49
+    ],
+    [
+     1,
+     2
+    ],
+    [
+     3,
+     46
+    ],
+    [
+     10,
+     93
+    ],
+    [
+     30,
+     133
+    ]
+   ],
+   "log": true,
+   "map": [
+    1,
+    0
+   ],
+   "auto_angle": null,
+   "ptr_len": 64,
+   "ptr_w": 7,
+   "ptr_colour": "#1c1b1a",
+   "fmt": "{:.1f} ms",
+   "ptr_in": 6,
+   "steps": [
+    0.1,
+    0.3,
+    1,
+    3,
+    10,
+    30
+   ]
+  },
+  {
+   "type": "knob",
+   "id": "release",
+   "param": "release",
+   "cx": 1282.5,
+   "cy": 346,
+   "rs": 85,
+   "sprite_w": 179,
+   "cal": [
+    [
+     0.1,
+     -117
+    ],
+    [
+     0.3,
+     -44
+    ],
+    [
+     0.6,
+     0
+    ],
+    [
+     1.2,
+     44
+    ]
+   ],
+   "log": true,
+   "map": [
+    0.001,
+    0
+   ],
+   "auto_angle": 119,
+   "ptr_len": 64,
+   "ptr_w": 7,
+   "ptr_colour": "#1c1b1a",
+   "fmt": "{:.1f} s",
+   "ptr_in": 6,
+   "steps": [
+    0.1,
+    0.3,
+    0.6,
+    1.2
+   ]
+  },
+  {
+   "type": "knob",
+   "id": "makeup",
+   "param": "output",
+   "cx": 1619.5,
+   "cy": 343,
+   "rs": 83,
+   "sprite_w": 175,
+   "cal": [
+    [
+     -9,
+     -112
+    ],
+    [
+     -6,
+     -69
+    ],
+    [
+     -3,
+     -35
+    ],
+    [
+     0,
+     1
+    ],
+    [
+     3,
+     37
+    ],
+    [
+     6,
+     70
+    ],
+    [
+     9,
+     104
+    ],
+    [
+     12,
+     133
+    ]
+   ],
+   "log": false,
+   "map": [
+    1,
+    0
+   ],
+   "auto_angle": null,
+   "ptr_len": 64,
+   "ptr_w": 7,
+   "ptr_colour": "#1c1b1a",
+   "fmt": "{:+.1f} dB",
+   "ptr_in": 6,
+   "steps": []
+  },
+  {
+   "type": "knob",
+   "id": "mix",
+   "param": "mix",
+   "cx": 1929.5,
+   "cy": 323.5,
+   "rs": 68,
+   "sprite_w": 145,
+   "cal": [
+    [
+     0,
+     -144
+    ],
+    [
+     100,
+     141
+    ]
+   ],
+   "log": false,
+   "map": [
+    1,
+    0
+   ],
+   "auto_angle": null,
+   "ptr_len": 52,
+   "ptr_w": 6,
+   "ptr_colour": "#1c1b1a",
+   "fmt": "{:.0f} %",
+   "ptr_in": 5,
+   "steps": []
+  },
+  {
+   "type": "knob",
+   "id": "hpf",
+   "param": "schpf",
+   "cx": 787.5,
+   "cy": 598.5,
+   "rs": 40,
+   "sprite_w": 89,
+   "cal": [
+    [
+     20,
+     -130
+    ],
+    [
+     400,
+     127
+    ]
+   ],
+   "log": true,
+   "map": [
+    1,
+    0
+   ],
+   "auto_angle": null,
+   "ptr_len": 33,
+   "ptr_w": 4,
+   "ptr_colour": "#1c1b1a",
+   "fmt": "{:.0f} Hz",
+   "ptr_in": 3,
+   "steps": []
+  }
+ ]
+}

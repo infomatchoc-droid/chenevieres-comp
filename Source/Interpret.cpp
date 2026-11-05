@@ -117,9 +117,9 @@ Eff interpret (Model m, const Values& v)
 
         case Model::BusCompG:
         {
-            static const float r[] = { 2, 4, 10 };
+            static const float r[] = { 2, 3, 4, 6, 10 };
             e.detector = Detector::Rms; e.rmsMs = 1.0f;
-            e.ratio = snap (e.ratio, r, 3, true);
+            e.ratio = snap (e.ratio, r, 5, true);
             static const float a[] = { 0.1f, 0.3f, 1.0f, 3.0f, 10.0f, 30.0f };
             e.attackMs = snap (e.attackMs, a, 6, true);
             static const float rel[] = { 100.0f, 300.0f, 600.0f, 1200.0f };
@@ -128,6 +128,8 @@ Eff interpret (Model m, const Values& v)
             e.kneeDb = 2.0f;
             e.autoGain = v.on (pAutoGain);
             e.link = v[pLink] >= 50.0f ? 1.0f : 0.0f;
+            e.outputDb = clampf (e.outputDb, -9.0f, 12.0f);
+            e.thresholdDb = clampf (e.thresholdDb, -40.0f, 0.0f);
             e.sat = Sat::Console; e.satDrive = 0.15f;
             e.scHpfHz = clampf (e.scHpfHz, 0.0f, 400.0f);
             break;

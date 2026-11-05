@@ -12,19 +12,23 @@ struct KnobDef
     float autoAngle;                            // cran AUTO en fin de course (NAN = aucun)
     float ptrIn, ptrLen, ptrW; juce::uint32 ptrColour;
     const char* fmt;
+    std::vector<float> steps;                   // crans (valeurs affichées) ; vide = continu
 };
 struct ButtonsDef
 {
     const char* id; const char* param; std::vector<float> values; std::vector<juce::Rectangle<int>> rects; int glow;
     bool toggle;                                          // un seul bouton qui s'allume / s'éteint
     std::vector<std::pair<const char*, float>> also;      // paramètres remis à une valeur au clic
+    float off;                                            // valeur « éteint » d'un bouton seul (NAN = défaut)
+    float litAbove;                                       // allumé au-dessus de cette valeur (NAN = égalité)
 };
+struct LedBarDef { const char* id; int channel; std::vector<std::pair<juce::Rectangle<int>, float>> leds; };
 struct LedDef { const char* id; const char* param; juce::Rectangle<int> rect; };
 struct NeedleDef { const char* id; int channel; float px, py, len; juce::Rectangle<int> face; std::vector<std::pair<float, float>> scale; const char* source; };
 struct PanelDef
 {
     const char* model = ""; int width = 0, height = 0;
-    std::vector<KnobDef> knobs; std::vector<ButtonsDef> buttons; std::vector<LedDef> leds; std::vector<NeedleDef> needles;
+    std::vector<KnobDef> knobs; std::vector<ButtonsDef> buttons; std::vector<LedDef> leds; std::vector<NeedleDef> needles; std::vector<LedBarDef> ledbars;
 };
 
 const PanelDef* panelFor (comp::Model m);
