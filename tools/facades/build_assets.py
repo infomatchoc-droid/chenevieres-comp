@@ -245,6 +245,58 @@ def build(model, outdir_res, outdir_layout):
         controls.append({'type': 'led', 'id': led['id'], 'param': led['param'], 'rect': led['rect'], 'hit': hit,
                          'on': led.get('on', 1), 'off': led.get('off', 0), 'lit_above': led.get('lit_above')})
 
+    # 3 quater) barres de segments rectangulaires : allumés -> éteints dans la façade, sprites allumés à part
+    for sb in cfg.get('segbars', []):
+        y0, y1 = sb['y']; E = sb['edges']; mg = sb.get('glow', 5)
+        ox0, ox1 = E[sb['off_src']], E[sb['off_src'] + 1]
+        off_cell = src[y0:y1, ox0 + 1:ox1].copy()
+        orig = base.copy()
+        leds = []
+        for i in range(len(E) - 1):
+            cx0, cx1 = E[i] + 1, E[i + 1]
+            base[y0:y1, cx0:cx1] = cv2.resize(off_cell, (cx1 - cx0, y1 - y0), interpolation=cv2.INTER_AREA)
+        # halo orange autour de la rangée : désaturé
+        zone = np.zeros((H, W), np.float32); zone[y0 - mg - 4:y1 + mg + 4, E[0] - 4:E[-1] + 4] = 1
+        zone[y0:y1, E[0]:E[-1]] = 0
+        zone = cv2.GaussianBlur(zone, (0, 0), 2)
+        hz = cv2.cvtColor(base, cv2.COLOR_BGR2HSV).astype(np.float32); hz[..., 1] *= 1 - 0.8 * zone; hz[..., 2] *= 1 - 0.3 * zone
+        base = cv2.cvtColor(np.clip(hz, 0, 255).astype(np.uint8), cv2.COLOR_HSV2BGR)
+        lx0, lx1 = E[sb['lit_src']], E[sb['lit_src'] + 1]
+        lit = src[y0 - mg:y1 + mg, lx0 + 1 - mg:lx1 + mg].astype(np.float32)
+        for i in range(len(E) - 1):
+            cx0, cx1 = E[i] + 1, E[i + 1]
+            w = cx1 - cx0 + 2 * mg
+            on = cv2.resize(lit, (w, y1 - y0 + 2 * mg), interpolation=cv2.INTER_AREA)
+            if i >= sb.get('orange_from', 999):
+                hh = cv2.cvtColor(on.astype(np.uint8), cv2.COLOR_BGR2HSV).astype(np.float32); hh[..., 0] = hh[..., 0] * 0.6
+                on = cv2.cvtColor(hh.astype(np.uint8), cv2.COLOR_HSV2BGR).astype(np.float32)
+            bg = base[y0 - mg:y1 + mg, cx0 - mg:cx1 + mg].astype(np.float32)
+            a = np.clip(np.abs(on - bg).max(axis=2) / 50, 0, 1)
+            a[mg:-mg, mg:-mg] = 1
+            Image.fromarray(np.dstack([cv2.cvtColor(on.astype(np.uint8), cv2.COLOR_BGR2RGB), (a * 255).astype(np.uint8)]), 'RGBA').save(
+                os.path.join(outdir_res, f"{model}_m_{sb['id']}_{i}.png"))
+            leds.append([cx0 - mg, y0 - mg, w, y1 - y0 + 2 * mg, sb['values'][i]])
+        controls.append({'type': 'ledbar', 'id': sb['id'], 'channel': sb['channel'], 'leds': leds})
+
+    # 3 quinquies) écran de courbe : fond et grille refaits, la courbe est dessinée en direct
+    for pl in cfg.get('plots', []):
+        x0, y0, x1, y1 = pl['rect']
+        pad = pl.get('pad', 3)
+        m = np.zeros((H, W), np.uint8); m[y0 - pad:y1 + pad, x0 - pad:x1 + pad] = 255
+        bgc = np.array(pl['bg'][::-1], np.float32)
+        yy = np.linspace(0, 1, y1 - y0 + 2 * pad)[:, None, None]
+        grad = bgc * (1.15 - 0.35 * yy)
+        base[y0 - pad:y1 + pad, x0 - pad:x1 + pad] = np.clip(np.broadcast_to(grad, (y1 - y0 + 2 * pad, x1 - x0 + 2 * pad, 3)), 0, 255).astype(np.uint8)
+        gc = tuple(int(v) for v in pl['grid'][::-1])
+        lo, hi = pl['range']
+        for v in range(int(lo), int(hi) + 1, int(pl['step'])):
+            t = (v - lo) / (hi - lo)
+            xg = int(round(x0 + t * (x1 - x0))); yg = int(round(y1 - t * (y1 - y0)))
+            cv2.line(base, (xg, y0), (xg, y1), gc, 1, cv2.LINE_AA)
+            cv2.line(base, (x0, yg), (x1, yg), gc, 1, cv2.LINE_AA)
+        cv2.rectangle(base, (x0, y0), (x1, y1), tuple(int(v * 1.4) for v in gc), 1, cv2.LINE_AA)
+        controls.append({'type': 'plot', 'id': pl['id'], 'rect': pl['rect'], 'range': pl['range']})
+
     # 3 bis) barre de LED de réduction de gain : éteintes dans la façade, allumées à part
     # boutons à sprite tournant (bouton « tête de poulet ») : retirés de la façade, fond reconstruit
     for k in cfg['knobs']:

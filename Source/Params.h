@@ -62,7 +62,7 @@ inline const ParamSpec& spec (int p)
         { "release",    "Release",      Kind::Float,  5.0f, 5000.0f, 200.0f, 250.0f, nullptr, "ms" },
         { "autorel",    "Auto release", Kind::Bool,   0, 1, 0, 0, nullptr, "" },
         { "knee",       "Knee",         Kind::Float,  0.0f, 24.0f, 6.0f, 0, nullptr, "dB" },
-        { "input",      "Input",        Kind::Float, -20.0f, 20.0f, 0.0f, 0, nullptr, "dB" },
+        { "input",      "Input",        Kind::Float, -24.0f, 24.0f, 0.0f, 0, nullptr, "dB" },
         { "output",     "Output",       Kind::Float, -40.0f, 40.0f, 0.0f, 0, nullptr, "dB" },
         { "mix",        "Mix",          Kind::Float,  0.0f, 100.0f, 100.0f, 0, nullptr, "%" },
         { "schpf",      "Sidechain HPF",Kind::Float,  0.0f, 1000.0f, 0.0f, 120.0f, nullptr, "Hz" },

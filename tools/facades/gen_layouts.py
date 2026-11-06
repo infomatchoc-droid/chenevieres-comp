@@ -49,6 +49,9 @@ for path in sorted(glob.glob(os.path.join(SRC, 'layouts', '*.json'))):
             r = c['rect']; hb = c['hit']
             out.append('    p.switches.push_back ({ "%s", "%s", { %s }, { %d, %d, %d, %d }, { %d, %d, %d, %d } });' % (
                 c['id'], c['param'], vals, r[0], r[1], r[2], r[3], hb[0], hb[1], hb[2], hb[3]))
+        elif t == 'plot':
+            r = c['rect']
+            out.append('    p.plots.push_back ({ "%s", { %d, %d, %d, %d }, %s, %s });' % (c['id'], r[0], r[1], r[2] - r[0], r[3] - r[1], f(c['range'][0]), f(c['range'][1])))
         elif t == 'ledbar':
             leds = ', '.join('{ { %d, %d, %d, %d }, %s }' % (x, y, w, h, f(v)) for x, y, w, h, v in c['leds'])
             out.append('    p.ledbars.push_back ({ "%s", %d, { %s } });' % (c['id'], c['channel'], leds))

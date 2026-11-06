@@ -25,13 +25,14 @@ struct ButtonsDef
     const char* unless;                                   // aucun bouton allumé si ce paramètre est actif (nullptr = jamais)
 };
 struct SwitchDef { const char* id; const char* param; std::vector<float> values; juce::Rectangle<int> rect, hit; };
+struct PlotDef { const char* id; juce::Rectangle<int> rect; float lo, hi; };
 struct LedBarDef { const char* id; int channel; std::vector<std::pair<juce::Rectangle<int>, float>> leds; };
 struct LedDef { const char* id; const char* param; juce::Rectangle<int> rect, hit; float on, off, litAbove; };
 struct NeedleDef { const char* id; int channel; float px, py, len; juce::Rectangle<int> face; std::vector<std::pair<float, float>> scale; const char* source; };
 struct PanelDef
 {
     const char* model = ""; int width = 0, height = 0;
-    std::vector<KnobDef> knobs; std::vector<ButtonsDef> buttons; std::vector<LedDef> leds; std::vector<NeedleDef> needles; std::vector<LedBarDef> ledbars; std::vector<SwitchDef> switches;
+    std::vector<KnobDef> knobs; std::vector<ButtonsDef> buttons; std::vector<LedDef> leds; std::vector<NeedleDef> needles; std::vector<LedBarDef> ledbars; std::vector<SwitchDef> switches; std::vector<PlotDef> plots;
 };
 
 const PanelDef* panelFor (comp::Model m);

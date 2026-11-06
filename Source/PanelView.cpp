@@ -292,6 +292,46 @@ void PanelView::paint (juce::Graphics& g)
         g.drawImage (imgs["s_" + juce::String (w.id) + "_" + juce::String (i)], { r.getX() * s, r.getY() * s, r.getWidth() * s, r.getHeight() * s });
     }
 
+    for (auto& pl : def->plots)
+    {
+        // courbe de transfert du modèle, en direct
+        comp::Engine eng;
+        eng.setParams (comp::interpret (model, proc.values()));
+        const auto r = pl.rect.toFloat();
+        const juce::Rectangle<float> R (r.getX() * s, r.getY() * s, r.getWidth() * s, r.getHeight() * s);
+        auto px = [&] (float db) { return R.getX() + (db - pl.lo) / (pl.hi - pl.lo) * R.getWidth(); };
+        auto py = [&] (float db) { return R.getBottom() - (db - pl.lo) / (pl.hi - pl.lo) * R.getHeight(); };
+        juce::Graphics::ScopedSaveState ss (g);
+        g.reduceClipRegion (R.toNearestInt());
+        g.setColour (juce::Colour (0x66d8d0c0));
+        g.drawLine (px (pl.lo), py (pl.lo), px (pl.hi), py (pl.hi), 1.2f * s);
+        juce::Path c;
+        for (int i = 0; i <= 120; ++i)
+        {
+            const float L = pl.lo + (pl.hi - pl.lo) * (float) i / 120.0f;
+            const float o = L + eng.staticGain (L);
+            if (i == 0) c.startNewSubPath (px (L), py (o)); else c.lineTo (px (L), py (o));
+        }
+        for (int k = 3; k >= 1; --k)
+        {
+            g.setColour (juce::Colour (0xffffa020).withAlpha (0.12f));
+            g.strokePath (c, juce::PathStrokeType ((3.0f + 4.0f * (float) k) * s, juce::PathStrokeType::curved, juce::PathStrokeType::rounded));
+        }
+        g.setColour (juce::Colour (0xffffb020));
+        g.strokePath (c, juce::PathStrokeType (4.0f * s, juce::PathStrokeType::curved, juce::PathStrokeType::rounded));
+        const float T = comp::interpret (model, proc.values()).thresholdDb;
+        const float d = 13.0f * s;
+        g.setColour (juce::Colour (0xffffc040));
+        g.fillEllipse (px (T) - d / 2, py (T + eng.staticGain (T)) - d / 2, d, d);
+        g.setColour (juce::Colour (0xff7a4a08));
+        g.drawEllipse (px (T) - d / 2, py (T + eng.staticGain (T)) - d / 2, d, d, 1.2f * s);
+        // point du signal en cours
+        const float in = juce::jlimit (pl.lo, pl.hi, proc.inDb[0].load());
+        const float dd = 9.0f * s;
+        g.setColour (juce::Colours::white.withAlpha (0.85f));
+        g.fillEllipse (px (in) - dd / 2, py (in + eng.staticGain (in)) - dd / 2, dd, dd);
+    }
+
     for (auto& lb : def->ledbars)
     {
         const float gr = lb.channel < 0 ? juce::jmax (needle[0], needle[1]) : needle[lb.channel];
@@ -383,7 +423,7 @@ void PanelView::timerCallback()
         inLvl[c] += (ti < inLvl[c] ? 0.45f : 0.12f) * (ti - inLvl[c]);
         outLvl[c] += (to < outLvl[c] ? 0.45f : 0.12f) * (to - outLvl[c]);
     }
-    if (def != nullptr && def->needles.empty() && def->ledbars.empty() && generic.isEmpty()) return;
+    if (def != nullptr && def->needles.empty() && def->ledbars.empty() && def->plots.empty() && generic.isEmpty()) return;
     repaint();
 }
 
