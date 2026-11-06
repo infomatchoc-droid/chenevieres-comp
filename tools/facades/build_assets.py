@@ -36,12 +36,15 @@ def erase_text(crop, lit):
     return cv2.inpaint(crop, mask, 3, cv2.INPAINT_TELEA)
 
 
+LABEL = {}
+
+
 def draw_label(img_rgba, rect_in_img, label, lit, size):
     d = ImageDraw.Draw(img_rgba)
     x, y, w, h = rect_in_img
     lines = label.split('\n')
-    f = font(size)
-    col = (43, 24, 4, 255) if lit else (232, 232, 234, 255)
+    f = ImageFont.truetype(os.path.join(HERE, 'fonts', LABEL['font']), size) if LABEL.get('font') else font(size)
+    col = tuple(LABEL.get('on', (43, 24, 4))) + (255,) if lit else tuple(LABEL.get('off', (232, 232, 234))) + (255,)
     lh = size * 1.0
     total = lh * len(lines)
     for i, ln in enumerate(lines):
@@ -101,6 +104,10 @@ def build(model, outdir_res, outdir_layout):
     # 2) boutons lumineux
     templates = {}
     for grp in cfg.get('buttons', []):
+        LABEL.clear()
+        if 'label_font' in grp: LABEL['font'] = grp['label_font']
+        if 'label_on' in grp: LABEL['on'] = grp['label_on']
+        if 'label_off' in grp: LABEL['off'] = grp['label_off']
         rects = grp['rects']
         margin = grp.get('glow', 14)
         if 'template_group' in grp:
@@ -118,7 +125,7 @@ def build(model, outdir_res, outdir_layout):
                 unlit_t = erase_text(src[fy:fy + fh, fx:fx + fw].copy(), False)
             elif far is not None:
                 fx, fy, fw, fh = rects[far]
-                unlit_t = erase_text(src[fy:fy + fh, fx:fx + fw].copy(), False)
+                unlit_t = erase_text(src[fy:fy + fh, fx:fx + fw].copy(), not grp.get('unlit_light', False) is False and grp.get('unlit_light', False))
             else:
                 unlit_t = grp_unlit_from_lit(lit_t)
             templates[grp['id']] = (lit_t, lit_halo, unlit_t)
@@ -191,7 +198,8 @@ def build(model, outdir_res, outdir_layout):
             rgba.save(os.path.join(outdir_res, name))
         controls.append({'type': 'buttons', 'id': grp['id'], 'param': grp['param'], 'values': grp['values'],
                          'rects': rects, 'glow': margin, 'toggle': grp.get('toggle', False),
-                         'also': grp.get('also', []), 'off': grp.get('off'), 'lit_above': grp.get('lit_above')})
+                         'also': grp.get('also', []), 'off': grp.get('off'), 'lit_above': grp.get('lit_above'),
+                         'unless': grp.get('unless')})
 
     # 3) voyants : la façade de base les montre éteints
     for led in cfg.get('leds', []):
@@ -238,6 +246,13 @@ def build(model, outdir_res, outdir_layout):
                          'on': led.get('on', 1), 'off': led.get('off', 0), 'lit_above': led.get('lit_above')})
 
     # 3 bis) barre de LED de réduction de gain : éteintes dans la façade, allumées à part
+    # boutons à sprite tournant (bouton « tête de poulet ») : retirés de la façade, fond reconstruit
+    for k in cfg['knobs']:
+        if k.get('rotate') is not None:
+            m = np.zeros((H, W), np.uint8)
+            cv2.circle(m, (int(k['cx']), int(k['cy'])), int(k['rs'] + 3), 255, -1)
+            base = cv2.inpaint(base, m, 6, cv2.INPAINT_TELEA)
+
     for bar in cfg.get('ledbars', []):
         r = bar['r']; g = bar.get('glow', 16)
         leds = []
@@ -370,7 +385,7 @@ def build(model, outdir_res, outdir_layout):
                          'map': k.get('map', [1, 0]), 'auto_angle': k.get('auto_angle'),
                          'ptr_len': k.get('ptr_len', k['rs'] * 0.98), 'ptr_w': k.get('ptr_w', k['rs'] * 0.085),
                          'ptr_colour': k.get('ptr_colour', '#f4f4f6'), 'fmt': k.get('fmt', ''),
-                         'ptr_in': k.get('ptr_in', k['rs'] * 0.04), 'steps': k.get('steps', [])})
+                         'ptr_in': k.get('ptr_in', k['rs'] * 0.04), 'steps': k.get('steps', []), 'rotate': k.get('rotate')})
 
     for m in cfg.get('meters', []):
         controls.append({'type': 'needle', 'id': m['id'], 'pivot': m['pivot'], 'len': m['len'],

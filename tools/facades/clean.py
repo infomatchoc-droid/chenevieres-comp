@@ -66,7 +66,9 @@ def knob_sprite(img, cx, cy, rs, rptr, bands=1, erase_at=None):
     pol = cv2.warpPolar(crop, (R * 2, NA), c, R, cv2.WARP_POLAR_LINEAR + cv2.INTER_CUBIC)
     # pol[angle, radius]; radius index scale = R*2 / R
     sc = (R * 2) / R
-    if erase_at:
+    if bands == 0:
+        pass
+    elif erase_at:
         pol = remove_band_at(pol, NA, sc, erase_at[0], erase_at[1])
     else:
         for _ in range(bands):
@@ -181,7 +183,14 @@ def run(model):
         # en miroir pour éviter les raccords.
         x0, y0, x1, y1 = hd['erase']
         fx0, fx1 = hd['fill_from']
-        strip = clean[y0:y1, fx0:fx1]
+        strip = clean[y0:y1, fx0:fx1].copy()
+        if 'fill_rows' in hd:   # bande propre répétée verticalement (en miroir)
+            r0, r1 = hd['fill_rows']
+            src_rows = clean[r0:r1, fx0:fx1]
+            parts, k = [], 0
+            while sum(p.shape[0] for p in parts) < y1 - y0:
+                parts.append(src_rows if k % 2 == 0 else src_rows[::-1]); k += 1
+            strip = np.concatenate(parts, axis=0)[:y1 - y0].copy()
         tiles = []
         k = 0
         while sum(t.shape[1] for t in tiles) < x1 - x0:
@@ -199,7 +208,13 @@ def run(model):
             target = left * (1 - t) + right * t
         else:
             target = right + 0 * t
-        fill = fill + (target - smean)
+        if hd.get('match_bg'):
+            # décalage unique : fond d'origine de la zone (hors texte clair) contre la bande recopiée
+            orig = clean[y0:y1, x0:x1].reshape(-1, 3).astype(np.float32)
+            bgpx = orig[orig.max(axis=1) < hd['match_bg']]
+            fill = fill + (np.median(bgpx, axis=0) - np.median(fill.reshape(-1, 3), axis=0))
+        elif not hd.get('no_match'):
+            fill = fill + (target - smean)
         bg = clean.astype(np.float32).copy()
         bg[y0:y1, x0:x1] = fill
         m = np.zeros(img.shape[:2], np.float32); m[y0:y1, x0:x1] = 1

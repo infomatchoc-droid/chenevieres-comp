@@ -13,6 +13,7 @@ struct KnobDef
     float ptrIn, ptrLen, ptrW; juce::uint32 ptrColour;
     const char* fmt;
     std::vector<float> steps;                   // crans (valeurs affichées) ; vide = continu
+    float rotateFrom;                           // NAN = capuchon fixe + pointeur dessiné ; sinon le sprite tourne (angle d'origine)
 };
 struct ButtonsDef
 {
@@ -21,6 +22,7 @@ struct ButtonsDef
     std::vector<std::pair<const char*, float>> also;      // paramètres remis à une valeur au clic
     float off;                                            // valeur « éteint » d'un bouton seul (NAN = défaut)
     float litAbove;                                       // allumé au-dessus de cette valeur (NAN = égalité)
+    const char* unless;                                   // aucun bouton allumé si ce paramètre est actif (nullptr = jamais)
 };
 struct SwitchDef { const char* id; const char* param; std::vector<float> values; juce::Rectangle<int> rect, hit; };
 struct LedBarDef { const char* id; int channel; std::vector<std::pair<juce::Rectangle<int>, float>> leds; };

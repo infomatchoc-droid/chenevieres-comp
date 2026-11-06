@@ -238,6 +238,7 @@ void PanelView::paint (juce::Graphics& g)
 
     for (auto& b : def->buttons)
     {
+        if (b.unless != nullptr && getV (b.unless) >= 0.5f) continue;
         const float cur = getV (b.param);
         int best = 0; float bestD = 1e30f;
         for (size_t i = 0; i < b.values.size(); ++i)
@@ -308,6 +309,14 @@ void PanelView::paint (juce::Graphics& g)
         const float half = (float) (k.spriteW - 1) * 0.5f;
         const float x0 = std::round (k.cx) - std::floor (half), y0 = std::round (k.cy) - std::floor (half);
         g.setOpacity (1.0f);
+        if (! std::isnan (k.rotateFrom))
+        {
+            const float rot = (knobAngle (k) - k.rotateFrom) * degToRad;
+            juce::Graphics::ScopedSaveState ss (g);
+            g.addTransform (juce::AffineTransform::rotation (rot, k.cx * s, k.cy * s));
+            g.drawImage (spr, { x0 * s, y0 * s, (float) spr.getWidth() * s, (float) spr.getHeight() * s });
+            continue;
+        }
         g.drawImage (spr, { x0 * s, y0 * s, (float) spr.getWidth() * s, (float) spr.getHeight() * s });
         drawPointer (g, k.cx * s, k.cy * s, knobAngle (k), k.ptrIn * s, k.ptrLen * s, k.ptrW * s, juce::Colour (k.ptrColour));
     }
