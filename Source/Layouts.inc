@@ -140,6 +140,24 @@ static PanelDef make_pressorx()
     return p;
 }
 
+static PanelDef make_shadowmaster()
+{
+    PanelDef p;
+    p.model = "shadowmaster"; p.width = 2172; p.height = 724;
+    p.buttons.push_back ({ "mode", "shtube", { 1.000f, 0.000f }, { { 143, 553, 121, 78 }, { 292, 553, 122, 78 } }, 16, false, {  }, NAN, NAN });
+    p.knobs.push_back ({ "input", "input", 496.500f, 311.500f, 80.000f, 169, { { -20.000f, -134.000f }, { -16.000f, -109.000f }, { -12.000f, -82.000f }, { -8.000f, -56.000f }, { -4.000f, -31.000f }, { 0.000f, -1.000f }, { 4.000f, 31.000f }, { 8.000f, 58.000f }, { 12.000f, 83.000f }, { 16.000f, 107.000f }, { 20.000f, 130.000f } }, false, 1.000f, 0.000f, NAN, 6.000f, 62.400f, 7.000f, 0xfff1efe9, "%+.1f dB", {  } });
+    p.knobs.push_back ({ "threshold", "threshold", 777.500f, 308.500f, 80.000f, 169, { { -30.000f, -135.000f }, { -25.000f, -91.000f }, { -20.000f, -48.000f }, { -15.000f, -21.000f }, { -10.000f, 1.000f }, { -6.000f, 45.000f }, { -3.000f, 90.000f }, { 0.000f, 135.000f } }, false, 1.000f, 0.000f, NAN, 6.000f, 62.400f, 7.000f, 0xfff1efe9, "%.1f dB", {  } });
+    p.knobs.push_back ({ "ratio", "ratio", 1633.500f, 309.500f, 78.000f, 165, { { 1.500f, -110.000f }, { 3.000f, -52.000f }, { 4.000f, -2.000f }, { 6.000f, 47.000f } }, true, 1.000f, 0.000f, NAN, 6.000f, 60.840f, 7.000f, 0xfff1efe9, "%.1f:1", {  } });
+    p.knobs.push_back ({ "output", "output", 1912.500f, 307.500f, 80.000f, 169, { { -20.000f, -134.000f }, { -16.000f, -109.000f }, { -12.000f, -83.000f }, { -8.000f, -57.000f }, { -4.000f, -32.000f }, { 0.000f, -1.000f }, { 4.000f, 31.000f }, { 8.000f, 59.000f }, { 12.000f, 83.000f }, { 16.000f, 108.000f }, { 20.000f, 131.000f } }, false, 1.000f, 0.000f, NAN, 6.000f, 62.400f, 7.000f, 0xfff1efe9, "%+.1f dB", {  } });
+    p.knobs.push_back ({ "attack", "attack", 599.500f, 587.500f, 44.000f, 97, { { 30.000f, -135.000f }, { 0.100f, 135.000f } }, true, 1.000f, 0.000f, NAN, 4.000f, 34.000f, 5.000f, 0xfff1efe9, "%.1f ms", {  } });
+    p.knobs.push_back ({ "release", "release", 854.500f, 587.500f, 44.000f, 97, { { 1200.000f, -135.000f }, { 50.000f, 135.000f } }, true, 1.000f, 0.000f, NAN, 4.000f, 34.000f, 5.000f, 0xfff1efe9, "%.0f ms", {  } });
+    p.knobs.push_back ({ "mix", "mix", 1101.500f, 587.500f, 44.000f, 97, { { 0.000f, -135.000f }, { 100.000f, 135.000f } }, false, 1.000f, 0.000f, NAN, 4.000f, 34.000f, 5.000f, 0xfff1efe9, "%.0f %%", {  } });
+    p.knobs.push_back ({ "hpf", "schpf", 1369.500f, 595.500f, 42.000f, 93, { { 0.000f, -100.000f }, { 50.000f, -55.000f }, { 100.000f, 0.000f }, { 200.000f, 55.000f }, { 400.000f, 100.000f } }, false, 1.000f, 0.000f, NAN, 3.000f, 30.000f, 4.000f, 0xfff1efe9, "%.0f Hz", { 0.000f, 50.000f, 100.000f, 200.000f, 400.000f } });
+    p.knobs.push_back ({ "zener", "zdrive", 1644.500f, 592.500f, 44.000f, 97, { { 0.000f, -135.000f }, { 10.000f, 135.000f } }, false, 1.000f, 0.000f, NAN, 4.000f, 32.000f, 5.000f, 0xfff1efe9, "%.1f", {  } });
+    p.needles.push_back ({ "grL", 0, 1189.100f, 651.300f, 400.000f, { 960, 175, 440, 233 }, { { 20.000f, -25.900f }, { 10.000f, -18.300f }, { 7.000f, -12.000f }, { 5.000f, -6.500f }, { 3.000f, -0.100f }, { 1.000f, 5.700f }, { 0.000f, 10.700f } }, "gr" });
+    return p;
+}
+
 static PanelDef make_tubeoneb()
 {
     PanelDef p;
@@ -177,7 +195,7 @@ static PanelDef make_varimuv()
 
 static const PanelDef* findPanel (const juce::String& model)
 {
-    static const std::vector<PanelDef> all { make_a2500(), make_buscompg(), make_db160x(), make_fair670(), make_fet76(), make_opto2a(), make_opto3a(), make_pressorx(), make_tubeoneb(), make_varimuv() };
+    static const std::vector<PanelDef> all { make_a2500(), make_buscompg(), make_db160x(), make_fair670(), make_fet76(), make_opto2a(), make_opto3a(), make_pressorx(), make_shadowmaster(), make_tubeoneb(), make_varimuv() };
     for (auto& p : all) if (model == p.model) return &p;
     return nullptr;
 }
