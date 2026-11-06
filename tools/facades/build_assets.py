@@ -62,6 +62,13 @@ def build(model, outdir_res, outdir_layout):
     for t in cfg.get('texts', []):
         f = ImageFont.truetype(os.path.join(HERE, 'fonts', t['font']), t['size']) if 'font' in t else font(t['size'], t.get('w', '700'))
         col = tuple(t.get('fill', [232, 232, 234]))
+        if 'shadow' in t:
+            sdx, sdy, sblur, salpha = t['shadow']
+            from PIL import ImageFilter
+            shl = Image.new('RGBA', pil.size, (0, 0, 0, 0))
+            ImageDraw.Draw(shl).text((t['x'] + sdx, t['y'] + sdy), t['s'], font=f, fill=(0, 0, 0, int(salpha * 255)), anchor=t.get('anchor', 'ls'))
+            pil.alpha_composite(shl.filter(ImageFilter.GaussianBlur(sblur)))
+            d = ImageDraw.Draw(pil)
         if 'parts' in t:
             x = t['x']
             for txt, pc in t['parts']:

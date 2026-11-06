@@ -9,6 +9,22 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 ORIG = os.path.join(HERE, "..", "..", "design", "facades-originales")
 os.chdir(HERE)
 
+def remove_band_at(pol, NA, sc, ang_deg, half_deg):
+    """Efface une bande d'angle connu (0 = haut, sens horaire), par interpolation radiale à chaque rayon."""
+    centre = ((ang_deg - 90) % 360) / 360 * NA
+    lo, hi = int(centre - half_deg / 360 * NA), int(centre + half_deg / 360 * NA)
+    for j in range(pol.shape[1]):
+        r = max(j / sc, 1.0)
+        extra = int(min(NA // 6, 6.0 / (2 * math.pi * r) * NA))
+        l2, h2 = lo - extra, hi + extra
+        L = h2 - l2
+        A, B = pol[l2 % NA, j].copy(), pol[h2 % NA, j].copy()
+        for k in range(1, L):
+            t = k / L
+            pol[(l2 + k) % NA, j] = A * (1 - t) + B * t
+    return pol
+
+
 def remove_band(pol, NA, sc, rptr):
     rr0, rr1 = int(rptr * 0.25 * sc), int(rptr * 0.95 * sc)
     lum = pol[:, rr0:rr1].mean(axis=2)
@@ -39,7 +55,7 @@ def remove_band(pol, NA, sc, rptr):
     return pol
 
 
-def knob_sprite(img, cx, cy, rs, rptr, bands=1):
+def knob_sprite(img, cx, cy, rs, rptr, bands=1, erase_at=None):
     """Capuchon + jupe de rayon rs, pointeur supprimé par interpolation angulaire."""
     pad = 4
     R = int(math.ceil(rs)) + pad
@@ -50,8 +66,11 @@ def knob_sprite(img, cx, cy, rs, rptr, bands=1):
     pol = cv2.warpPolar(crop, (R * 2, NA), c, R, cv2.WARP_POLAR_LINEAR + cv2.INTER_CUBIC)
     # pol[angle, radius]; radius index scale = R*2 / R
     sc = (R * 2) / R
-    for _ in range(bands):
-        pol = remove_band(pol, NA, sc, rptr)
+    if erase_at:
+        pol = remove_band_at(pol, NA, sc, erase_at[0], erase_at[1])
+    else:
+        for _ in range(bands):
+            pol = remove_band(pol, NA, sc, rptr)
     out = cv2.warpPolar(pol, (crop.shape[1], crop.shape[0]), c, R,
                         cv2.WARP_POLAR_LINEAR + cv2.INTER_CUBIC + cv2.WARP_INVERSE_MAP)
     # le centre (quelques px) est mal défini en polaire : moyenne locale
@@ -88,7 +107,7 @@ def run(model):
     mask = np.zeros(img.shape[:2], np.uint8)
     info = {}
     for k in cfg['knobs']:
-        rgba, c, ang = knob_sprite(img, k['cx'], k['cy'], k['rs'], k['rptr'], k.get('bands', 1))
+        rgba, c, ang = knob_sprite(img, k['cx'], k['cy'], k['rs'], k['rptr'], k.get('bands', 1), k.get('erase_at'))
         cv2.imwrite(f"out/{model}/knob_{k['id']}.png", rgba)
         info[k['id']] = {'orig_pointer_deg': ang}
     needle_fill = []
@@ -186,8 +205,9 @@ def run(model):
         m = m[..., None]
         bg = bg * m + clean.astype(np.float32) * (1 - m)
         bgfill = bg.copy()
-        mv = hd.get('move')
-        if mv:
+        mvs = hd.get('move')
+        mvs = [] if not mvs else (mvs if isinstance(mvs, list) else [mvs])
+        for mv in mvs:
             ax0, ay0, ax1, ay1 = mv['rect']; dx = mv['dx']
             src = img[ay0:ay1, ax0:ax1].astype(np.float32)
             ref = bgfill[ay0:ay1, ax0:ax1]
