@@ -142,7 +142,10 @@ def run(model):
         # zone rectangulaire : on efface les pixels de texte (clairs ou foncés selon 'mode')
         x0, y0, x1, y1 = e['rect']
         sub = cv2.cvtColor(img[y0:y1, x0:x1], cv2.COLOR_BGR2GRAY)
-        if e.get('mode', 'all') == 'light':
+        if e.get('mode') == 'dark':
+            mm = (sub < e.get('thr', 110)).astype(np.uint8) * 255
+            mm = cv2.dilate(mm, np.ones((5, 5), np.uint8))
+        elif e.get('mode', 'all') == 'light':
             mm = (sub > e.get('thr', 120)).astype(np.uint8) * 255
             mm = cv2.dilate(mm, np.ones((5, 5), np.uint8))
         else:
@@ -162,6 +165,13 @@ def run(model):
         mm = cv2.dilate(sel.astype(np.uint8) * 255, np.ones((7, 7), np.uint8))
         mask |= mm
     clean = cv2.inpaint(img, mask, 5, cv2.INPAINT_TELEA)
+    for e in cfg.get('tile_fill', []):   # zone refaite en répétant des colonnes propres (plaques, cadres)
+        x0, y0, x1, y1 = e['rect']; s0, s1 = e['from']
+        strip = img[y0:y1, s0:s1]
+        parts, k = [], 0
+        while sum(p.shape[1] for p in parts) < x1 - x0:
+            parts.append(strip if k % 2 == 0 else strip[:, ::-1]); k += 1
+        clean[y0:y1, x0:x1] = np.concatenate(parts, axis=1)[:, :x1 - x0]
     for m, fillimg in needle_fill:   # cadran : fond lisse du cadran plutôt que bavure des graduations
         soft = cv2.GaussianBlur(m.astype(np.float32) / 255, (0, 0), 1.2)[..., None]
         clean = (clean.astype(np.float32) * (1 - soft) + fillimg.astype(np.float32) * soft).astype(np.uint8)
