@@ -24,6 +24,14 @@ float PanelView::getV (const char* param) const
 void PanelView::setV (const char* param, float v)
 {
     if (param[0] == '@') { ui[param + 1] = v; return; }
+    if (std::strcmp (param, "timeconst") == 0)
+    {
+        // TIME CONSTANT : écrit aussi attaque / relâchement partagés (retrouvés sur les autres modèles)
+        auto vals = proc.values();
+        comp::applyTimeConst (vals, (int) std::lround (v));
+        for (int p : { pTimeConst, pAttack, pRelease, pAutoRelease }) proc.setValue (p, vals[p]);
+        return;
+    }
     proc.setValue (paramIndex (param), v);
 }
 
@@ -170,7 +178,7 @@ void PanelView::setKnobFromAngle (const KnobDef& k, float angle)
         if (autoOn) return;
     }
     const float disp = snapStep (k, interp (k.cal, juce::jlimit (firstA, lastA, angle), knobLogSafe (k), false));
-    proc.setValue (p, (disp - k.mapB) / k.mapA);
+    setV (k.param, (disp - k.mapB) / k.mapA);
 }
 
 juce::String PanelView::knobText (const KnobDef& k) const

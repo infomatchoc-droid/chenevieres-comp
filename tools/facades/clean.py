@@ -134,7 +134,8 @@ def run(model):
             mask |= remove_needle(img, None, n['needle_from'], n['needle_to'], n['face'], arc_y=n.get('arc_y', 0))
     for t in cfg.get('texts', []):
         if 'erase' in t:
-            cfg.setdefault('erase', []).append({'rect': t['erase'], 'mode': 'all'})
+            cfg.setdefault('erase', []).append({'rect': t['erase'], 'mode': t.get('erase_mode', 'all'), 'thr': t.get('erase_thr', 120),
+                                                'keep_circle': t.get('keep_circle')})
     for e in cfg.get('erase', []):
         # zone rectangulaire : on efface les pixels de texte (clairs ou foncés selon 'mode')
         x0, y0, x1, y1 = e['rect']
@@ -144,6 +145,10 @@ def run(model):
             mm = cv2.dilate(mm, np.ones((5, 5), np.uint8))
         else:
             mm = np.full(sub.shape, 255, np.uint8)
+        if e.get('keep_circle'):
+            kx, ky, kr = e['keep_circle']
+            yy, xx = np.mgrid[y0:y1, x0:x1]
+            mm[np.hypot(xx - kx, yy - ky) < kr] = 0
         mask[y0:y1, x0:x1] |= mm
     g = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
     H, W = g.shape
