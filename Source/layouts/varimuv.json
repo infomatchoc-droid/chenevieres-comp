@@ -1,0 +1,484 @@
+{
+ "model": "varimuv",
+ "size": [
+  2172,
+  724
+ ],
+ "controls": [
+  {
+   "type": "buttons",
+   "id": "comp",
+   "param": "bypass",
+   "values": [
+    0
+   ],
+   "rects": [
+    [
+     144,
+     552,
+     78,
+     72
+    ]
+   ],
+   "glow": 16,
+   "toggle": true,
+   "also": [],
+   "off": 1,
+   "lit_above": null
+  },
+  {
+   "type": "buttons",
+   "id": "mode",
+   "param": "limit",
+   "values": [
+    0,
+    1
+   ],
+   "rects": [
+    [
+     315,
+     548,
+     108,
+     74
+    ],
+    [
+     442,
+     548,
+     108,
+     74
+    ]
+   ],
+   "glow": 16,
+   "toggle": false,
+   "also": [],
+   "off": null,
+   "lit_above": null
+  },
+  {
+   "type": "buttons",
+   "id": "sc",
+   "param": "scext",
+   "values": [
+    0,
+    1
+   ],
+   "rects": [
+    [
+     858,
+     547,
+     108,
+     74
+    ],
+    [
+     987,
+     547,
+     104,
+     74
+    ]
+   ],
+   "glow": 16,
+   "toggle": false,
+   "also": [],
+   "off": null,
+   "lit_above": null
+  },
+  {
+   "type": "buttons",
+   "id": "link",
+   "param": "link",
+   "values": [
+    0,
+    100
+   ],
+   "rects": [
+    [
+     1153,
+     548,
+     104,
+     74
+    ],
+    [
+     1277,
+     548,
+     100,
+     74
+    ]
+   ],
+   "glow": 16,
+   "toggle": false,
+   "also": [],
+   "off": null,
+   "lit_above": null
+  },
+  {
+   "type": "knob",
+   "id": "input",
+   "param": "input",
+   "cx": 246.5,
+   "cy": 311.5,
+   "rs": 84,
+   "sprite_w": 177,
+   "cal": [
+    [
+     -20,
+     -134
+    ],
+    [
+     -16,
+     -107
+    ],
+    [
+     -12,
+     -84
+    ],
+    [
+     -8,
+     -56
+    ],
+    [
+     -4,
+     -28
+    ],
+    [
+     0,
+     -1
+    ],
+    [
+     4,
+     25
+    ],
+    [
+     8,
+     55
+    ],
+    [
+     12,
+     81
+    ],
+    [
+     16,
+     105
+    ],
+    [
+     20,
+     131
+    ]
+   ],
+   "log": false,
+   "map": [
+    1,
+    0
+   ],
+   "auto_angle": null,
+   "ptr_len": 65.52,
+   "ptr_w": 7,
+   "ptr_colour": "#f1efe9",
+   "fmt": "{:+.1f} dB",
+   "ptr_in": 6,
+   "steps": []
+  },
+  {
+   "type": "knob",
+   "id": "threshold",
+   "param": "threshold",
+   "cx": 583.5,
+   "cy": 313.5,
+   "rs": 82,
+   "sprite_w": 173,
+   "cal": [
+    [
+     -30,
+     -141
+    ],
+    [
+     -25,
+     -105
+    ],
+    [
+     -20,
+     -61
+    ],
+    [
+     -15,
+     -25
+    ],
+    [
+     -10,
+     18
+    ],
+    [
+     -5,
+     57
+    ],
+    [
+     0,
+     108
+    ]
+   ],
+   "log": false,
+   "map": [
+    1,
+    0
+   ],
+   "auto_angle": null,
+   "ptr_len": 63.96,
+   "ptr_w": 7,
+   "ptr_colour": "#f1efe9",
+   "fmt": "{:.1f} dB",
+   "ptr_in": 6,
+   "steps": []
+  },
+  {
+   "type": "knob",
+   "id": "tc",
+   "param": "timeconst",
+   "cx": 876.5,
+   "cy": 314.5,
+   "rs": 75,
+   "sprite_w": 159,
+   "cal": [
+    [
+     1,
+     -99
+    ],
+    [
+     2,
+     -58
+    ],
+    [
+     3,
+     -21
+    ],
+    [
+     4,
+     20
+    ],
+    [
+     5,
+     58
+    ],
+    [
+     6,
+     100
+    ]
+   ],
+   "log": false,
+   "map": [
+    1,
+    0
+   ],
+   "auto_angle": null,
+   "ptr_len": 58.5,
+   "ptr_w": 7,
+   "ptr_colour": "#f1efe9",
+   "fmt": "{:.0f}",
+   "ptr_in": 6,
+   "steps": [
+    1,
+    2,
+    3,
+    4,
+    5,
+    6
+   ]
+  },
+  {
+   "type": "knob",
+   "id": "output",
+   "param": "output",
+   "cx": 1200.5,
+   "cy": 311.5,
+   "rs": 84,
+   "sprite_w": 177,
+   "cal": [
+    [
+     -20,
+     -135
+    ],
+    [
+     -16,
+     -109
+    ],
+    [
+     -12,
+     -85
+    ],
+    [
+     -8,
+     -57
+    ],
+    [
+     -4,
+     -28
+    ],
+    [
+     0,
+     0
+    ],
+    [
+     4,
+     26
+    ],
+    [
+     8,
+     56
+    ],
+    [
+     12,
+     82
+    ],
+    [
+     16,
+     107
+    ],
+    [
+     20,
+     132
+    ]
+   ],
+   "log": false,
+   "map": [
+    1,
+    0
+   ],
+   "auto_angle": null,
+   "ptr_len": 65.52,
+   "ptr_w": 7,
+   "ptr_colour": "#f1efe9",
+   "fmt": "{:+.1f} dB",
+   "ptr_in": 6,
+   "steps": []
+  },
+  {
+   "type": "knob",
+   "id": "mix",
+   "param": "mix",
+   "cx": 1979.5,
+   "cy": 313.5,
+   "rs": 80,
+   "sprite_w": 169,
+   "cal": [
+    [
+     0,
+     -142
+    ],
+    [
+     50,
+     0
+    ],
+    [
+     100,
+     138
+    ]
+   ],
+   "log": false,
+   "map": [
+    1,
+    0
+   ],
+   "auto_angle": null,
+   "ptr_len": 62.400000000000006,
+   "ptr_w": 7,
+   "ptr_colour": "#f1efe9",
+   "fmt": "{:.0f} %",
+   "ptr_in": 6,
+   "steps": []
+  },
+  {
+   "type": "knob",
+   "id": "hpf",
+   "param": "schpf",
+   "cx": 701.5,
+   "cy": 599.5,
+   "rs": 42,
+   "sprite_w": 93,
+   "cal": [
+    [
+     20,
+     -103
+    ],
+    [
+     40,
+     -55
+    ],
+    [
+     80,
+     -1
+    ],
+    [
+     160,
+     55
+    ],
+    [
+     320,
+     103
+    ]
+   ],
+   "log": true,
+   "map": [
+    1,
+    0
+   ],
+   "auto_angle": null,
+   "ptr_len": 30,
+   "ptr_w": 4,
+   "ptr_colour": "#f1efe9",
+   "fmt": "{:.0f} Hz",
+   "ptr_in": 3,
+   "steps": [
+    20,
+    40,
+    80,
+    160,
+    320
+   ]
+  },
+  {
+   "type": "needle",
+   "id": "grL",
+   "pivot": [
+    1609.8,
+    656.8
+   ],
+   "len": 400,
+   "face": [
+    1395,
+    180,
+    1810,
+    412
+   ],
+   "scale": [
+    [
+     20,
+     -25.0
+    ],
+    [
+     10,
+     -16.5
+    ],
+    [
+     7,
+     -10.7
+    ],
+    [
+     5,
+     -5.7
+    ],
+    [
+     3,
+     -0.1
+    ],
+    [
+     1,
+     5.0
+    ],
+    [
+     0,
+     9.8
+    ]
+   ],
+   "channel": 0,
+   "source": "gr"
+  }
+ ]
+}
