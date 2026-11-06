@@ -22,13 +22,14 @@ struct ButtonsDef
     float off;                                            // valeur « éteint » d'un bouton seul (NAN = défaut)
     float litAbove;                                       // allumé au-dessus de cette valeur (NAN = égalité)
 };
+struct SwitchDef { const char* id; const char* param; std::vector<float> values; juce::Rectangle<int> rect, hit; };
 struct LedBarDef { const char* id; int channel; std::vector<std::pair<juce::Rectangle<int>, float>> leds; };
 struct LedDef { const char* id; const char* param; juce::Rectangle<int> rect, hit; float on, off, litAbove; };
 struct NeedleDef { const char* id; int channel; float px, py, len; juce::Rectangle<int> face; std::vector<std::pair<float, float>> scale; const char* source; };
 struct PanelDef
 {
     const char* model = ""; int width = 0, height = 0;
-    std::vector<KnobDef> knobs; std::vector<ButtonsDef> buttons; std::vector<LedDef> leds; std::vector<NeedleDef> needles; std::vector<LedBarDef> ledbars;
+    std::vector<KnobDef> knobs; std::vector<ButtonsDef> buttons; std::vector<LedDef> leds; std::vector<NeedleDef> needles; std::vector<LedBarDef> ledbars; std::vector<SwitchDef> switches;
 };
 
 const PanelDef* panelFor (comp::Model m);

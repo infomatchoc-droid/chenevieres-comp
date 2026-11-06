@@ -87,6 +87,21 @@ static PanelDef make_opto2a()
     return p;
 }
 
+static PanelDef make_opto3a()
+{
+    PanelDef p;
+    p.model = "opto3a"; p.width = 2172; p.height = 724;
+    p.buttons.push_back ({ "mode", "limit", { 0.000f, 1.000f }, { { 1857, 206, 132, 86 }, { 1857, 367, 132, 86 } }, 16, false, {  }, NAN, NAN });
+    p.leds.push_back ({ "in", "bypass", { 155, 565, 89, 89 }, { 155, 565, 89, 89 }, 0.000f, 1.000f, NAN });
+    p.switches.push_back ({ "hf", "hfroll", { 0.000f, 1.000f }, { 472, 557, 110, 110 }, { 472, 557, 110, 110 } });
+    p.switches.push_back ({ "schpf", "schpf", { 0.000f, 50.000f, 100.000f, 200.000f }, { 1273, 568, 122, 122 }, { 1273, 568, 122, 122 } });
+    p.knobs.push_back ({ "gain", "output", 338.500f, 331.500f, 82.000f, 173, { { -40.000f, -140.000f }, { -30.000f, -112.000f }, { -20.000f, -75.000f }, { -10.000f, -41.000f }, { 0.000f, 0.000f }, { 10.000f, 39.000f }, { 20.000f, 75.000f }, { 30.000f, 113.000f }, { 40.000f, 140.000f } }, false, 1.000f, 0.000f, NAN, 8.000f, 72.000f, 7.000f, 0xffe9e6e0, "%+.1f dB", {  } });
+    p.knobs.push_back ({ "peak", "threshold", 1515.500f, 328.500f, 81.000f, 171, { { 0.000f, -138.000f }, { 1.000f, -110.000f }, { 2.000f, -86.000f }, { 3.000f, -60.000f }, { 4.000f, -30.000f }, { 5.000f, 0.000f }, { 6.000f, 30.000f }, { 7.000f, 59.000f }, { 8.000f, 85.000f }, { 9.000f, 112.000f }, { 10.000f, 140.000f } }, false, -0.250f, 0.000f, NAN, 8.000f, 72.000f, 7.000f, 0xffe9e6e0, "%.1f", {  } });
+    p.knobs.push_back ({ "mix", "mix", 909.500f, 610.500f, 47.000f, 103, { { 0.000f, -135.000f }, { 100.000f, 135.000f } }, false, 1.000f, 0.000f, NAN, 5.000f, 40.000f, 5.000f, 0xffe9e6e0, "%.0f %%", {  } });
+    p.needles.push_back ({ "grL", 0, 928.000f, 800.000f, 530.000f, { 650, 175, 560, 257 }, { { 0.000f, 9.600f }, { 1.000f, 5.100f }, { 3.000f, 0.000f }, { 5.000f, -6.100f }, { 7.000f, -11.200f }, { 10.000f, -16.700f }, { 20.000f, -23.600f } }, "gr" });
+    return p;
+}
+
 static PanelDef make_pressorx()
 {
     PanelDef p;
@@ -110,7 +125,7 @@ static PanelDef make_pressorx()
 
 static const PanelDef* findPanel (const juce::String& model)
 {
-    static const std::vector<PanelDef> all { make_a2500(), make_buscompg(), make_db160x(), make_fet76(), make_opto2a(), make_pressorx() };
+    static const std::vector<PanelDef> all { make_a2500(), make_buscompg(), make_db160x(), make_fet76(), make_opto2a(), make_opto3a(), make_pressorx() };
     for (auto& p : all) if (model == p.model) return &p;
     return nullptr;
 }

@@ -7,6 +7,14 @@ using namespace comp;
 
 const PanelDef* panelFor (Model m) { return findPanel (info (m).id); }
 
+static int nearestIndex (const std::vector<float>& vals, float v)
+{
+    int best = 0; float bestD = 1e30f;
+    for (size_t i = 0; i < vals.size(); ++i)
+        if (std::abs (v - vals[i]) < bestD) { bestD = std::abs (v - vals[i]); best = (int) i; }
+    return best;
+}
+
 float PanelView::getV (const char* param) const
 {
     if (param[0] == '@') { auto it = ui.find (param + 1); return it == ui.end() ? 0.0f : it->second; }
@@ -52,6 +60,9 @@ void PanelView::setModel (Model m)
             for (size_t i = 0; i < b.rects.size(); ++i)
                 imgs["b_" + juce::String (b.id) + "_" + juce::String ((int) i)] = look::image (id + "_b_" + b.id + "_" + juce::String ((int) i) + ".png");
         for (auto& l : def->leds) imgs["l_" + juce::String (l.id)] = look::image (id + "_l_" + l.id + ".png");
+        for (auto& w : def->switches)
+            for (size_t i = 0; i < w.values.size(); ++i)
+                imgs["s_" + juce::String (w.id) + "_" + juce::String ((int) i)] = look::image (id + "_s_" + w.id + "_" + juce::String ((int) i) + ".png");
         for (auto& b : def->ledbars)
             for (size_t i = 0; i < b.leds.size(); ++i)
                 imgs["m_" + juce::String (b.id) + "_" + juce::String ((int) i)] = look::image (id + "_m_" + b.id + "_" + juce::String ((int) i) + ".png");
@@ -265,6 +276,13 @@ void PanelView::paint (juce::Graphics& g)
         g.drawLine ({ piv, tip }, 3.2f * s);
     }
 
+    for (auto& w : def->switches)
+    {
+        const int i = nearestIndex (w.values, getV (w.param));
+        const auto r = w.rect.toFloat();
+        g.drawImage (imgs["s_" + juce::String (w.id) + "_" + juce::String (i)], { r.getX() * s, r.getY() * s, r.getWidth() * s, r.getHeight() * s });
+    }
+
     for (auto& lb : def->ledbars)
     {
         const float gr = lb.channel < 0 ? juce::jmax (needle[0], needle[1]) : needle[lb.channel];
@@ -386,6 +404,22 @@ void PanelView::mouseDown (const juce::MouseEvent& e)
                 return;
             }
         }
+    for (auto& w : def->switches)
+    {
+        const auto r = w.hit.toFloat();
+        const juce::Rectangle<float> hr (r.getX() * s, r.getY() * s, r.getWidth() * s, r.getHeight() * s);
+        if (hr.contains (e.position))
+        {
+            // clic à gauche du levier : position précédente ; à droite : suivante (2 positions : bascule)
+            const int n = (int) w.values.size();
+            int i = nearestIndex (w.values, getV (w.param));
+            if (n == 2) i = 1 - i;
+            else i = juce::jlimit (0, n - 1, i + (e.position.x < hr.getCentreX() ? -1 : 1));
+            setV (w.param, w.values[(size_t) i]);
+            repaint();
+            return;
+        }
+    }
     for (auto& l : def->leds)
     {
         const auto r = l.hit.toFloat();

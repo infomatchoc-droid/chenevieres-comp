@@ -83,7 +83,7 @@ def build(model, outdir_res, outdir_layout):
     for arc in cfg.get('arcs', []):
         S = 4
         lay = Image.new('RGBA', (pil.width * S, pil.height * S), (0, 0, 0, 0))
-        r = arc['r'] * S
+        r = (arc['r'] + arc['w'] / 2) * S   # PIL trace l'épaisseur vers l'intérieur
         box = [(arc['cx'] * S - r), (arc['cy'] * S - r), (arc['cx'] * S + r), (arc['cy'] * S + r)]
         # PIL : angles depuis l'axe x, sens horaire ; nos angles : depuis le haut
         ImageDraw.Draw(lay).arc(box, arc['a0'] - 90, arc['a1'] - 90, fill=tuple(arc['fill']) + (255,), width=int(arc['w'] * S))
@@ -201,6 +201,22 @@ def build(model, outdir_res, outdir_layout):
             base[y0:y1, x0:x1] = (off.astype(np.float32) * m + base[y0:y1, x0:x1].astype(np.float32) * (1 - m)).astype(np.uint8)
             a = np.clip(np.abs(lit - base[y0:y1, x0:x1].astype(np.float32)).max(axis=2) / 40, 0, 1) * m[..., 0]
             on = Image.fromarray(np.dstack([cv2.cvtColor(lit.astype(np.uint8), cv2.COLOR_BGR2RGB), (a * 255).astype(np.uint8)]), 'RGBA')
+        elif led.get('grey'):
+            reg = base[y0:y1, x0:x1].copy()
+            on = Image.fromarray(cv2.cvtColor(reg, cv2.COLOR_BGR2RGB)).convert('RGBA')
+            hsv = cv2.cvtColor(reg, cv2.COLOR_BGR2HSV).astype(np.float32)
+            mm = np.zeros((h, w), np.float32); cv2.circle(mm, (w // 2, h // 2), led['grey'], 1.0, -1)
+            mm = cv2.GaussianBlur(mm, (0, 0), 1.5)
+            hsv[..., 1] *= 1 - 0.85 * mm
+            hsv[..., 2] *= 1 - 0.68 * mm
+            base[y0:y1, x0:x1] = cv2.cvtColor(np.clip(hsv, 0, 255).astype(np.uint8), cv2.COLOR_HSV2BGR)
+            # halo autour de la lampe : grisé aussi
+            ring = np.zeros((H, W), np.float32); cv2.circle(ring, ((x0 + x1) // 2, (y0 + y1) // 2), led['grey'] + 16, 1.0, -1)
+            ring = cv2.GaussianBlur(ring, (0, 0), 3)
+            hz = cv2.cvtColor(base, cv2.COLOR_BGR2HSV).astype(np.float32); hz[..., 1] *= 1 - 0.8 * ring
+            base = cv2.cvtColor(np.clip(hz, 0, 255).astype(np.uint8), cv2.COLOR_HSV2BGR)
+            a = np.clip(np.abs(cv2.cvtColor(np.array(on.convert('RGB')), cv2.COLOR_RGB2BGR).astype(np.float32) - base[y0:y1, x0:x1].astype(np.float32)).max(axis=2) / 30, 0, 1)
+            on.putalpha(Image.fromarray((a * 255).astype(np.uint8)))
         else:
             reg = base[y0:y1, x0:x1].copy()
             on = Image.fromarray(cv2.cvtColor(reg, cv2.COLOR_BGR2RGB)).convert('RGBA')
@@ -267,6 +283,76 @@ def build(model, outdir_res, outdir_layout):
             Image.fromarray(rgba, 'RGBA').save(os.path.join(outdir_res, f"{model}_m_{bar['id']}_{i}.png"))
             leds.append([x0, y0, 2 * R2, 2 * R2, v])
         controls.append({'type': 'ledbar', 'id': bar['id'], 'channel': bar.get('channel', -1), 'leds': leds})
+
+    # 3 ter) inverseurs à levier : levier effacé de la façade, redessiné pour chaque position
+    for sw in cfg.get('switches', []):
+        cx, cy = sw['center']; L = sw['len']; br = sw['ball_r']
+        tx, ty = sw['tip_now']
+        nr = sw['nut_r']
+        m = np.zeros((H, W), np.uint8)
+        cv2.circle(m, (int(cx), int(cy)), int(nr + 4), 255, -1)
+        cv2.line(m, (int(cx), int(cy)), (int(tx), int(ty)), 255, int(sw.get('rod_w', 12) + 14))
+        cv2.circle(m, (int(tx), int(ty)), int(br + 9), 255, -1)
+        base = cv2.inpaint(base, m, 8, cv2.INPAINT_TELEA)
+        # écrou redessiné : ombre, bague crantée, bague polie, canon
+        pilb = Image.fromarray(cv2.cvtColor(base, cv2.COLOR_BGR2RGB)).convert('RGBA')
+        S = 4; R = int(max(L + br, nr) + 16)
+        col0 = np.array(sw.get('colour', [196, 160, 118]), float)
+        nut = Image.new('RGBA', (2 * R * S, 2 * R * S), (0, 0, 0, 0))
+        dn = ImageDraw.Draw(nut); C = R * S
+        def disc(r, fill, dx=0, dy=0): dn.ellipse([C + dx - r, C + dy - r, C + dx + r, C + dy + r], fill=fill)
+        from PIL import ImageFilter
+        shn = Image.new('RGBA', nut.size, (0, 0, 0, 0)); ImageDraw.Draw(shn).ellipse([C + 3 * S - nr * S, C + 5 * S - nr * S, C + 3 * S + nr * S, C + 5 * S + nr * S], fill=(0, 0, 0, 170))
+        shn = shn.filter(ImageFilter.GaussianBlur(4 * S))
+        for k in range(36):            # bague crantée
+            t = k / 36 * 2 * math.pi
+            shade = 0.35 + 0.35 * (0.5 + 0.5 * math.cos(t + 2.2))
+            cc = tuple(int(v * shade) for v in col0) + (255,)
+            dn.pieslice([C - nr * S, C - nr * S, C + nr * S, C + nr * S], math.degrees(t), math.degrees(t) + 10, fill=cc)
+        disc(nr * 0.8 * S, (10, 8, 6, 255))
+        for k in range(28, 0, -1):     # bague polie (reflets concentriques)
+            r = nr * 0.74 * S * k / 28
+            f = 1 - k / 28
+            shade = 0.3 + 0.95 * abs(math.sin(f * 7 + 0.6))
+            disc(r, tuple(int(min(255, v * shade)) for v in col0) + (255,), -0.06 * r, -0.08 * r)
+        disc(nr * 0.5 * S, tuple(int(v * 0.35) for v in col0) + (255,))
+        disc(sw.get('rod_w', 12) * 0.7 * S, (14, 11, 8, 255))
+        nutimg = Image.alpha_composite(shn, nut).resize((2 * R, 2 * R), Image.LANCZOS)
+        pilb.alpha_composite(nutimg, (int(cx - R), int(cy - R)))
+        base = cv2.cvtColor(np.array(pilb.convert('RGB')), cv2.COLOR_RGB2BGR)
+        col = np.array(sw.get('colour', [196, 160, 118]), float)
+        for i, ang in enumerate(sw['angles']):
+            img = Image.new('RGBA', (2 * R * S, 2 * R * S), (0, 0, 0, 0))
+            sh = Image.new('RGBA', img.size, (0, 0, 0, 0))
+            a = math.radians(ang); ux, uy = math.sin(a), -math.cos(a); px_, py_ = -uy, ux
+            c0 = np.array([R * S, R * S], float); tip = c0 + np.array([ux, uy]) * L * S
+            w0, w1 = sw.get('rod_w', 12) * S, sw.get('rod_w', 12) * 0.75 * S
+            ds = ImageDraw.Draw(sh)
+            ds.line([tuple(c0 + [4 * S, 6 * S]), tuple(tip + [4 * S, 6 * S])], fill=(0, 0, 0, 150), width=int(w0))
+            ds.ellipse([tip[0] + 4 * S - br * S, tip[1] + 6 * S - br * S, tip[0] + 4 * S + br * S, tip[1] + 6 * S + br * S], fill=(0, 0, 0, 150))
+            from PIL import ImageFilter
+            sh = sh.filter(ImageFilter.GaussianBlur(4 * S))
+            d2 = ImageDraw.Draw(img)
+            # tige : bandes parallèles, claire au centre
+            n = 14
+            for k in range(n):
+                t = (k + 0.5) / n * 2 - 1
+                shade = 0.45 + 0.75 * (1 - abs(t + 0.25)) ** 1.5
+                cc = tuple(int(min(255, v * shade)) for v in col) + (255,)
+                off0 = np.array([px_, py_]) * t * w0 / 2; off1 = np.array([px_, py_]) * t * w1 / 2
+                d2.line([tuple(c0 + off0), tuple(tip + off1)], fill=cc, width=int(w0 / n * 1.6) + 1)
+            # boule : dégradé radial
+            for k in range(24, 0, -1):
+                rr = br * S * k / 24
+                f = 1 - k / 24
+                shade = 0.5 + 0.9 * f
+                cxk, cyk = tip[0] - br * S * 0.3 * f, tip[1] - br * S * 0.35 * f
+                cc = tuple(int(min(255, v * shade)) for v in col) + (255,)
+                d2.ellipse([cxk - rr, cyk - rr, cxk + rr, cyk + rr], fill=cc)
+            out = Image.alpha_composite(sh, img).resize((2 * R, 2 * R), Image.LANCZOS)
+            out.save(os.path.join(outdir_res, f"{model}_s_{sw['id']}_{i}.png"))
+        controls.append({'type': 'switch', 'id': sw['id'], 'param': sw['param'], 'values': sw['values'],
+                         'rect': [int(cx - R), int(cy - R), 2 * R, 2 * R], 'hit': sw.get('hit', [int(cx - R), int(cy - R), 2 * R, 2 * R])})
 
     # 4) boutons rotatifs
     for k in cfg['knobs']:

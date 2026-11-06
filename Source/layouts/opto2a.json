@@ -29,7 +29,9 @@
    ],
    "glow": 12,
    "toggle": false,
-   "also": []
+   "also": [],
+   "off": null,
+   "lit_above": null
   },
   {
    "type": "knob",
@@ -59,7 +61,8 @@
    "ptr_w": 8,
    "ptr_colour": "#efe9dc",
    "fmt": "{:.0f}",
-   "ptr_in": 10
+   "ptr_in": 10,
+   "steps": []
   },
   {
    "type": "knob",
@@ -89,7 +92,8 @@
    "ptr_w": 8,
    "ptr_colour": "#efe9dc",
    "fmt": "{:.0f}",
-   "ptr_in": 10
+   "ptr_in": 10,
+   "steps": []
   },
   {
    "type": "knob",
@@ -119,7 +123,8 @@
    "ptr_w": 5,
    "ptr_colour": "#efe9dc",
    "fmt": "{:.0f} Hz",
-   "ptr_in": 5
+   "ptr_in": 5,
+   "steps": []
   },
   {
    "type": "knob",
@@ -149,7 +154,8 @@
    "ptr_w": 6,
    "ptr_colour": "#efe9dc",
    "fmt": "{:.0f} %",
-   "ptr_in": 8
+   "ptr_in": 8,
+   "steps": []
   },
   {
    "type": "needle",

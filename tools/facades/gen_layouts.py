@@ -42,6 +42,11 @@ for path in sorted(glob.glob(os.path.join(SRC, 'layouts', '*.json'))):
             out.append('    p.buttons.push_back ({ "%s", "%s", { %s }, { %s }, %d, %s, { %s }, %s, %s });' % (
                 c['id'], c['param'], vals, rects, c['glow'], 'true' if c.get('toggle') else 'false', also,
                 nan(c.get('off')), nan(c.get('lit_above'))))
+        elif t == 'switch':
+            vals = ', '.join(f(v) for v in c['values'])
+            r = c['rect']; hb = c['hit']
+            out.append('    p.switches.push_back ({ "%s", "%s", { %s }, { %d, %d, %d, %d }, { %d, %d, %d, %d } });' % (
+                c['id'], c['param'], vals, r[0], r[1], r[2], r[3], hb[0], hb[1], hb[2], hb[3]))
         elif t == 'ledbar':
             leds = ', '.join('{ { %d, %d, %d, %d }, %s }' % (x, y, w, h, f(v)) for x, y, w, h, v in c['leds'])
             out.append('    p.ledbars.push_back ({ "%s", %d, { %s } });' % (c['id'], c['channel'], leds))
