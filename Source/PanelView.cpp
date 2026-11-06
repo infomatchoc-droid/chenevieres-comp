@@ -238,7 +238,7 @@ void PanelView::paint (juce::Graphics& g)
         g.drawImage (img, { r.getX() * s, r.getY() * s, r.getWidth() * s, r.getHeight() * s });
     }
     for (auto& l : def->leds)
-        if (v.on (paramIndex (l.param)))
+        if (const float cur = getV (l.param); std::isnan (l.litAbove) ? std::abs (cur - l.on) < 0.01f : cur >= l.litAbove)
         {
             const auto r = l.rect.toFloat();
             g.setOpacity (1.0f);
@@ -388,11 +388,12 @@ void PanelView::mouseDown (const juce::MouseEvent& e)
         }
     for (auto& l : def->leds)
     {
-        const auto r = l.rect.toFloat();
+        const auto r = l.hit.toFloat();
         if (juce::Rectangle<float> (r.getX() * s, r.getY() * s, r.getWidth() * s, r.getHeight() * s).contains (e.position))
         {
-            const int p = paramIndex (l.param);
-            proc.setValue (p, proc.value (p) >= 0.5f ? 0.0f : 1.0f);
+            const float cur = getV (l.param);
+            const bool lit = std::isnan (l.litAbove) ? std::abs (cur - l.on) < 0.01f : cur >= l.litAbove;
+            setV (l.param, lit ? l.off : l.on);
             repaint();
             return;
         }

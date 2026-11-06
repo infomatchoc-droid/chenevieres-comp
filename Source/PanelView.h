@@ -23,7 +23,7 @@ struct ButtonsDef
     float litAbove;                                       // allumé au-dessus de cette valeur (NAN = égalité)
 };
 struct LedBarDef { const char* id; int channel; std::vector<std::pair<juce::Rectangle<int>, float>> leds; };
-struct LedDef { const char* id; const char* param; juce::Rectangle<int> rect; };
+struct LedDef { const char* id; const char* param; juce::Rectangle<int> rect, hit; float on, off, litAbove; };
 struct NeedleDef { const char* id; int channel; float px, py, len; juce::Rectangle<int> face; std::vector<std::pair<float, float>> scale; const char* source; };
 struct PanelDef
 {

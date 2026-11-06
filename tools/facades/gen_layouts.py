@@ -47,7 +47,11 @@ for path in sorted(glob.glob(os.path.join(SRC, 'layouts', '*.json'))):
             out.append('    p.ledbars.push_back ({ "%s", %d, { %s } });' % (c['id'], c['channel'], leds))
         elif t == 'led':
             r = c['rect']
-            out.append('    p.leds.push_back ({ "%s", "%s", { %d, %d, %d, %d } });' % (c['id'], c['param'], r[0], r[1], r[2] - r[0], r[3] - r[1]))
+            hb = c.get('hit', r)
+            nan = lambda v: 'NAN' if v is None else f(v)
+            out.append('    p.leds.push_back ({ "%s", "%s", { %d, %d, %d, %d }, { %d, %d, %d, %d }, %s, %s, %s });' % (
+                c['id'], c['param'], r[0], r[1], r[2] - r[0], r[3] - r[1], hb[0], hb[1], hb[2] - hb[0], hb[3] - hb[1],
+                f(c.get('on', 1)), f(c.get('off', 0)), nan(c.get('lit_above'))))
         elif t == 'needle':
             sc = ', '.join('{ %s, %s }' % (f(a), f(b)) for a, b in c['scale'])
             fc = c['face']

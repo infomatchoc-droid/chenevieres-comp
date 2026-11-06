@@ -189,16 +189,30 @@ def build(model, outdir_res, outdir_layout):
     # 3) voyants : la façade de base les montre éteints
     for led in cfg.get('leds', []):
         x0, y0, x1, y1 = led['rect']
-        reg = base[y0:y1, x0:x1].copy()
-        on = Image.fromarray(cv2.cvtColor(reg, cv2.COLOR_BGR2RGB)).convert('RGBA')
-        hsv = cv2.cvtColor(reg, cv2.COLOR_BGR2HSV).astype(np.float32)
-        warm = (hsv[..., 1] > 90) & (hsv[..., 2] > 90)
-        hsv[..., 1] = np.where(warm, hsv[..., 1] * 0.15, hsv[..., 1])
-        hsv[..., 2] = np.where(warm, hsv[..., 2] * 0.45, hsv[..., 2])
-        base[y0:y1, x0:x1] = cv2.cvtColor(hsv.astype(np.uint8), cv2.COLOR_HSV2BGR)
+        w, h = x1 - x0, y1 - y0
+        if 'lit_src' in led:
+            # voyant rond : éteint = copie d'un voyant éteint de la façade, allumé = copie d'un voyant allumé
+            lx, ly = led['lit_src']; ox, oy = led['off_src']
+            lit = src[ly:ly + h, lx:lx + w].astype(np.float32)
+            off = src[oy:oy + h, ox:ox + w].copy()
+            m = np.zeros((h, w), np.float32)
+            cv2.circle(m, (w // 2, h // 2), min(w, h) // 2 - 1, 1.0, -1)
+            m = cv2.GaussianBlur(m, (0, 0), 2)[..., None]
+            base[y0:y1, x0:x1] = (off.astype(np.float32) * m + base[y0:y1, x0:x1].astype(np.float32) * (1 - m)).astype(np.uint8)
+            a = np.clip(np.abs(lit - base[y0:y1, x0:x1].astype(np.float32)).max(axis=2) / 40, 0, 1) * m[..., 0]
+            on = Image.fromarray(np.dstack([cv2.cvtColor(lit.astype(np.uint8), cv2.COLOR_BGR2RGB), (a * 255).astype(np.uint8)]), 'RGBA')
+        else:
+            reg = base[y0:y1, x0:x1].copy()
+            on = Image.fromarray(cv2.cvtColor(reg, cv2.COLOR_BGR2RGB)).convert('RGBA')
+            hsv = cv2.cvtColor(reg, cv2.COLOR_BGR2HSV).astype(np.float32)
+            warm = (hsv[..., 1] > 90) & (hsv[..., 2] > 90)
+            hsv[..., 1] = np.where(warm, hsv[..., 1] * 0.15, hsv[..., 1])
+            hsv[..., 2] = np.where(warm, hsv[..., 2] * 0.45, hsv[..., 2])
+            base[y0:y1, x0:x1] = cv2.cvtColor(hsv.astype(np.uint8), cv2.COLOR_HSV2BGR)
         on.save(os.path.join(outdir_res, f"{model}_l_{led['id']}.png"))
-        controls.append({'type': 'led', 'id': led['id'], 'param': led['param'], 'rect': led['rect'],
-                         'on_when': led.get('on_when', 1)})
+        hit = led.get('hit', led['rect'])
+        controls.append({'type': 'led', 'id': led['id'], 'param': led['param'], 'rect': led['rect'], 'hit': hit,
+                         'on': led.get('on', 1), 'off': led.get('off', 0), 'lit_above': led.get('lit_above')})
 
     # 3 bis) barre de LED de réduction de gain : éteintes dans la façade, allumées à part
     for bar in cfg.get('ledbars', []):
