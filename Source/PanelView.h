@@ -14,6 +14,7 @@ struct KnobDef
     const char* fmt;
     std::vector<float> steps;                   // crans (valeurs affichées) ; vide = continu
     float rotateFrom;                           // NAN = capuchon fixe + pointeur dessiné ; sinon le sprite tourne (angle d'origine)
+    float arcR, arcW;                           // anneau de valeur (style plat) ; 0 = aucun
 };
 struct ButtonsDef
 {
@@ -54,6 +55,7 @@ public:
     void mouseWheelMove (const juce::MouseEvent&, const juce::MouseWheelDetails&) override;
 
     static constexpr int logicalWidth = 1086;
+    int preferredHeight() const { return def != nullptr ? juce::roundToInt ((float) logicalWidth * (float) def->height / (float) def->width) : 362; }
     void settleMeters() { for (int i = 0; i < 60; ++i) timerCallback(); }
 
 private:
@@ -65,6 +67,9 @@ private:
     const KnobDef* knobAt (juce::Point<float>) const;
     float sc() const { return def ? (float) getWidth() / (float) def->width : 1.0f; }
     void paintGeneric (juce::Graphics&);
+    void paintRCVox (juce::Graphics&, float s);
+    bool rcvoxDrag (juce::Point<float> p, bool start);
+    int rcvoxTarget = 0;
 
     CompProcessor& proc;
     comp::Model model = comp::Model::A2500;

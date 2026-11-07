@@ -9,7 +9,7 @@ EditorContent::EditorContent (CompProcessor& p, std::function<void (float)> setS
 {
     addAndMakeVisible (bar);
     addAndMakeVisible (panel);
-    setSize (W, H);
+    setSize (W, heightNow());
 }
 
 void EditorContent::resized()
@@ -37,6 +37,7 @@ void EditorContent::openBrowser()
 void EditorContent::refreshModel()
 {
     panel.setModel (proc.model());
+    setSize (W, heightNow());
     bar.repaint();
     if (browser) browser->repaint();
 }
@@ -58,10 +59,10 @@ void CompEditor::applyScale (float s)
 {
     proc.uiScale = juce::jlimit (0.6f, 2.0f, s);
     content.setTransform (juce::AffineTransform::scale (proc.uiScale));
-    setSize (juce::roundToInt (EditorContent::W * proc.uiScale), juce::roundToInt (EditorContent::H * proc.uiScale));
+    setSize (juce::roundToInt (EditorContent::W * proc.uiScale), juce::roundToInt ((float) content.heightNow() * proc.uiScale));
 }
 
 void CompEditor::resized()
 {
-    content.setBounds (0, 0, EditorContent::W, EditorContent::H);
+    content.setBounds (0, 0, EditorContent::W, content.heightNow());
 }

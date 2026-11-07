@@ -55,7 +55,7 @@ def draw_label(img_rgba, rect_in_img, label, lit, size):
 def build(model, outdir_res, outdir_layout):
     cfg = json.load(open(f'layouts/{model}.json'))
     clean.run(model)
-    src = cv2.imread(os.path.join(clean.ORIG, f'{model}.png'))
+    src = cv2.imread(os.path.join(clean.ORIG, cfg.get('source', model) + '.png'))
     base = cv2.imread(f'out/{model}/panel.png')
     H, W = base.shape[:2]
 
@@ -437,7 +437,7 @@ def build(model, outdir_res, outdir_layout):
                          'map': k.get('map', [1, 0]), 'auto_angle': k.get('auto_angle'),
                          'ptr_len': k.get('ptr_len', k['rs'] * 0.98), 'ptr_w': k.get('ptr_w', k['rs'] * 0.085),
                          'ptr_colour': k.get('ptr_colour', '#f4f4f6'), 'fmt': k.get('fmt', ''),
-                         'ptr_in': k.get('ptr_in', k['rs'] * 0.04), 'steps': k.get('steps', []), 'rotate': k.get('rotate')})
+                         'ptr_in': k.get('ptr_in', k['rs'] * 0.04), 'steps': k.get('steps', []), 'rotate': k.get('rotate'), 'arc': k.get('arc', [0, 0])})
 
     for m in cfg.get('meters', []):
         controls.append({'type': 'needle', 'id': m['id'], 'pivot': m['pivot'], 'len': m['len'],

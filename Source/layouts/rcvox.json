@@ -1,0 +1,398 @@
+{
+ "model": "rcvox",
+ "size": [
+  1536,
+  1024
+ ],
+ "controls": [
+  {
+   "type": "buttons",
+   "id": "mode",
+   "param": "voxmode",
+   "values": [
+    0,
+    1,
+    2,
+    3
+   ],
+   "rects": [
+    [
+     69,
+     214,
+     165,
+     62
+    ],
+    [
+     69,
+     318,
+     165,
+     62
+    ],
+    [
+     69,
+     409,
+     165,
+     62
+    ],
+    [
+     69,
+     500,
+     165,
+     62
+    ]
+   ],
+   "glow": 14,
+   "toggle": false,
+   "also": [],
+   "off": null,
+   "lit_above": null,
+   "unless": null
+  },
+  {
+   "type": "buttons",
+   "id": "deess",
+   "param": "deess",
+   "values": [
+    1
+   ],
+   "rects": [
+    [
+     1205,
+     852,
+     90,
+     54
+    ]
+   ],
+   "glow": 14,
+   "toggle": true,
+   "also": [],
+   "off": 0,
+   "lit_above": null,
+   "unless": null
+  },
+  {
+   "type": "knob",
+   "id": "threshold",
+   "param": "threshold",
+   "cx": 158,
+   "cy": 877,
+   "rs": 47,
+   "sprite_w": 103,
+   "cal": [
+    [
+     -60,
+     -135
+    ],
+    [
+     0,
+     135
+    ]
+   ],
+   "log": false,
+   "map": [
+    1,
+    0
+   ],
+   "auto_angle": null,
+   "ptr_len": 37.6,
+   "ptr_w": 5,
+   "ptr_colour": "#2e2e30",
+   "fmt": "{:.1f} dB",
+   "ptr_in": 19.74,
+   "steps": [],
+   "rotate": null,
+   "arc": [
+    56,
+    6
+   ]
+  },
+  {
+   "type": "knob",
+   "id": "ratio",
+   "param": "ratio",
+   "cx": 371,
+   "cy": 877,
+   "rs": 47,
+   "sprite_w": 103,
+   "cal": [
+    [
+     1,
+     -135
+    ],
+    [
+     20,
+     135
+    ]
+   ],
+   "log": true,
+   "map": [
+    1,
+    0
+   ],
+   "auto_angle": null,
+   "ptr_len": 37.6,
+   "ptr_w": 5,
+   "ptr_colour": "#2e2e30",
+   "fmt": "{:.1f} : 1",
+   "ptr_in": 19.74,
+   "steps": [],
+   "rotate": null,
+   "arc": [
+    56,
+    6
+   ]
+  },
+  {
+   "type": "knob",
+   "id": "attack",
+   "param": "attack",
+   "cx": 585,
+   "cy": 876,
+   "rs": 47,
+   "sprite_w": 103,
+   "cal": [
+    [
+     0.1,
+     -135
+    ],
+    [
+     100,
+     135
+    ]
+   ],
+   "log": true,
+   "map": [
+    1,
+    0
+   ],
+   "auto_angle": null,
+   "ptr_len": 37.6,
+   "ptr_w": 5,
+   "ptr_colour": "#2e2e30",
+   "fmt": "{:.1f} ms",
+   "ptr_in": 19.74,
+   "steps": [],
+   "rotate": null,
+   "arc": [
+    56,
+    6
+   ]
+  },
+  {
+   "type": "knob",
+   "id": "release",
+   "param": "release",
+   "cx": 802,
+   "cy": 877,
+   "rs": 47,
+   "sprite_w": 103,
+   "cal": [
+    [
+     10,
+     -135
+    ],
+    [
+     1000,
+     135
+    ]
+   ],
+   "log": true,
+   "map": [
+    1,
+    0
+   ],
+   "auto_angle": null,
+   "ptr_len": 37.6,
+   "ptr_w": 5,
+   "ptr_colour": "#2e2e30",
+   "fmt": "{:.0f} ms",
+   "ptr_in": 19.74,
+   "steps": [],
+   "rotate": null,
+   "arc": [
+    56,
+    6
+   ]
+  },
+  {
+   "type": "knob",
+   "id": "knee",
+   "param": "knee",
+   "cx": 1022,
+   "cy": 877,
+   "rs": 47,
+   "sprite_w": 103,
+   "cal": [
+    [
+     24,
+     -135
+    ],
+    [
+     0,
+     135
+    ]
+   ],
+   "log": false,
+   "map": [
+    1,
+    0
+   ],
+   "auto_angle": null,
+   "ptr_len": 37.6,
+   "ptr_w": 5,
+   "ptr_colour": "#2e2e30",
+   "fmt": "{:.0f} dB",
+   "ptr_in": 19.74,
+   "steps": [],
+   "rotate": null,
+   "arc": [
+    56,
+    6
+   ]
+  },
+  {
+   "type": "knob",
+   "id": "deessf",
+   "param": "deessfreq",
+   "cx": 1389,
+   "cy": 878,
+   "rs": 47,
+   "sprite_w": 103,
+   "cal": [
+    [
+     2000,
+     -135
+    ],
+    [
+     10000,
+     135
+    ]
+   ],
+   "log": true,
+   "map": [
+    1,
+    0
+   ],
+   "auto_angle": null,
+   "ptr_len": 37.6,
+   "ptr_w": 5,
+   "ptr_colour": "#2e2e30",
+   "fmt": "{:.0f} Hz",
+   "ptr_in": 19.74,
+   "steps": [],
+   "rotate": null,
+   "arc": [
+    56,
+    6
+   ]
+  },
+  {
+   "type": "knob",
+   "id": "mix",
+   "param": "mix",
+   "cx": 1376,
+   "cy": 219,
+   "rs": 37,
+   "sprite_w": 83,
+   "cal": [
+    [
+     0,
+     -135
+    ],
+    [
+     100,
+     135
+    ]
+   ],
+   "log": false,
+   "map": [
+    1,
+    0
+   ],
+   "auto_angle": null,
+   "ptr_len": 29.6,
+   "ptr_w": 5,
+   "ptr_colour": "#2e2e30",
+   "fmt": "{:.0f} %",
+   "ptr_in": 15.54,
+   "steps": [],
+   "rotate": null,
+   "arc": [
+    44,
+    6
+   ]
+  },
+  {
+   "type": "knob",
+   "id": "hpf",
+   "param": "schpf",
+   "cx": 1377,
+   "cy": 405,
+   "rs": 37,
+   "sprite_w": 83,
+   "cal": [
+    [
+     40,
+     -135
+    ],
+    [
+     200,
+     135
+    ]
+   ],
+   "log": true,
+   "map": [
+    1,
+    0
+   ],
+   "auto_angle": null,
+   "ptr_len": 29.6,
+   "ptr_w": 5,
+   "ptr_colour": "#2e2e30",
+   "fmt": "{:.0f} Hz",
+   "ptr_in": 15.54,
+   "steps": [],
+   "rotate": null,
+   "arc": [
+    44,
+    6
+   ]
+  },
+  {
+   "type": "knob",
+   "id": "air",
+   "param": "air",
+   "cx": 1377,
+   "cy": 601,
+   "rs": 37,
+   "sprite_w": 83,
+   "cal": [
+    [
+     0,
+     -135
+    ],
+    [
+     100,
+     135
+    ]
+   ],
+   "log": false,
+   "map": [
+    1,
+    0
+   ],
+   "auto_angle": null,
+   "ptr_len": 29.6,
+   "ptr_w": 5,
+   "ptr_colour": "#2e2e30",
+   "fmt": "{:.0f} %",
+   "ptr_in": 15.54,
+   "steps": [],
+   "rotate": null,
+   "arc": [
+    44,
+    6
+   ]
+  }
+ ]
+}

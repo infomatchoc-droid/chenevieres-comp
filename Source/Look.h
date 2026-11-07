@@ -21,6 +21,13 @@ inline juce::Typeface::Ptr typeface (int weight)
     return weight >= 700 ? t700 : weight >= 600 ? t600 : t500;
 }
 
+inline juce::Font inter (float height, bool semibold = false)
+{
+    static juce::Typeface::Ptr m = juce::Typeface::createSystemTypefaceFor (BinaryData::InterMedium_otf, BinaryData::InterMedium_otfSize);
+    static juce::Typeface::Ptr sb = juce::Typeface::createSystemTypefaceFor (BinaryData::InterSemiBold_otf, BinaryData::InterSemiBold_otfSize);
+    return juce::Font (juce::FontOptions (semibold ? sb : m).withHeight (height));
+}
+
 inline juce::Font font (float height, int weight = 700)
 {
     return juce::Font (juce::FontOptions (typeface (weight)).withHeight (height));

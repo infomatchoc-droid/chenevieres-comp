@@ -30,11 +30,12 @@ for path in sorted(glob.glob(os.path.join(SRC, 'layouts', '*.json'))):
             auto = f(c['auto_angle']) if c.get('auto_angle') is not None else 'NAN'
             steps = ', '.join(f(v) for v in c.get('steps', []))
             rot = f(c['rotate']) if c.get('rotate') is not None else 'NAN'
-            out.append('    p.knobs.push_back ({ "%s", "%s", %s, %s, %s, %d, { %s }, %s, %s, %s, %s, %s, %s, %s, %s, "%s", { %s }, %s });' % (
+            arc = c.get('arc', [0, 0])
+            out.append('    p.knobs.push_back ({ "%s", "%s", %s, %s, %s, %d, { %s }, %s, %s, %s, %s, %s, %s, %s, %s, "%s", { %s }, %s, %s, %s });' % (
                 c['id'], c['param'], f(c['cx']), f(c['cy']), f(c['rs']), c['sprite_w'], cal,
                 'true' if c['log'] else 'false', f(c['map'][0]), f(c['map'][1]), auto,
                 f(c.get('ptr_in', c['rs'] * 0.04)), f(c['ptr_len']), f(c['ptr_w']), colour(c['ptr_colour']),
-                c['fmt'].replace('%', '%%').replace('{:', '%').replace('}', ''), steps, rot))
+                c['fmt'].replace('%', '%%').replace('{:', '%').replace('}', ''), steps, rot, f(arc[0]), f(arc[1])))
         elif t == 'buttons':
             vals = ', '.join(f(v) for v in c['values'])
             rects = ', '.join('{ %d, %d, %d, %d }' % tuple(r) for r in c['rects'])

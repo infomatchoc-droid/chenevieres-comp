@@ -70,6 +70,8 @@ juce_add_binary_data(ChenevieresCompData SOURCES
     Resources/fonts/RobotoCondensed-500.ttf
     Resources/fonts/RobotoCondensed-600.ttf
     Resources/fonts/RobotoCondensed-700.ttf
+    Resources/fonts/Inter-Medium.otf
+    Resources/fonts/Inter-SemiBold.otf
     ${PANEL_FILES}
     ${THUMB_FILES})
 

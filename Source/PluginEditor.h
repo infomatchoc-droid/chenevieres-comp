@@ -14,7 +14,8 @@ public:
     PanelView& getPanel() { return panel; }
 
     static constexpr int W = PanelView::logicalWidth;
-    static constexpr int H = TopBar::logicalHeight + 362;
+    int heightNow() const { return TopBar::logicalHeight + panel.preferredHeight(); }
+    std::function<void()> onSizeChange;
 
 private:
     CompProcessor& proc;
@@ -34,7 +35,7 @@ public:
 
 private:
     void parameterChanged (const juce::String&, float) override { triggerAsyncUpdate(); }
-    void handleAsyncUpdate() override { content.refreshModel(); }
+    void handleAsyncUpdate() override { content.refreshModel(); applyScale (proc.uiScale); }
 
     CompProcessor& proc;
     EditorContent content;

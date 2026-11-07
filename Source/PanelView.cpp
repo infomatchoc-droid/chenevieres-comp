@@ -345,6 +345,22 @@ void PanelView::paint (juce::Graphics& g)
 
     for (auto& k : def->knobs)
     {
+        if (k.arcR > 0)
+        {
+            float a0 = 1e9f, a1 = -1e9f;
+            for (auto& c : k.cal) { a0 = juce::jmin (a0, c.second); a1 = juce::jmax (a1, c.second); }
+            auto arc = [&] (float from, float to, juce::Colour col)
+            {
+                juce::Path p;
+                p.addCentredArc (k.cx * s, k.cy * s, k.arcR * s, k.arcR * s, 0.0f, from * degToRad, to * degToRad, true);
+                g.setColour (col);
+                g.strokePath (p, juce::PathStrokeType (k.arcW * s, juce::PathStrokeType::curved, juce::PathStrokeType::rounded));
+            };
+            arc (a0, a1, juce::Colour (0xffd6d2cc));
+            const float cur = knobAngle (k);
+            // les boutons dont la valeur basse est à droite (Knee) se remplissent depuis la gauche quand même
+            arc (a0, juce::jmax (a0 + 0.5f, cur), juce::Colour (0xfff59a16));
+        }
         const auto& spr = imgs["k_" + juce::String (k.id)];
         const float half = (float) (k.spriteW - 1) * 0.5f;
         const float x0 = std::round (k.cx) - std::floor (half), y0 = std::round (k.cy) - std::floor (half);
@@ -360,6 +376,8 @@ void PanelView::paint (juce::Graphics& g)
         g.drawImage (spr, { x0 * s, y0 * s, (float) spr.getWidth() * s, (float) spr.getHeight() * s });
         drawPointer (g, k.cx * s, k.cy * s, knobAngle (k), k.ptrIn * s, k.ptrLen * s, k.ptrW * s, juce::Colour (k.ptrColour));
     }
+
+    if (std::strcmp (def->model, "rcvox") == 0) paintRCVox (g, s);
 
     // bulle de valeur
     if (auto* k = dragKnob != nullptr ? dragKnob : hoverKnob)
@@ -433,6 +451,7 @@ void PanelView::mouseDown (const juce::MouseEvent& e)
 {
     if (def == nullptr) return;
     const float s = sc();
+    if (std::strcmp (def->model, "rcvox") == 0 && rcvoxDrag (e.position, true)) return;
     if (auto* k = knobAt (e.position))
     {
         dragKnob = k;
@@ -493,6 +512,7 @@ void PanelView::mouseDown (const juce::MouseEvent& e)
 
 void PanelView::mouseDrag (const juce::MouseEvent& e)
 {
+    if (rcvoxTarget != 0) { rcvoxDrag (e.position, false); return; }
     if (dragKnob == nullptr) return;
     const auto d = e.position - lastDrag;
     lastDrag = e.position;
@@ -508,6 +528,7 @@ void PanelView::mouseDrag (const juce::MouseEvent& e)
 
 void PanelView::mouseUp (const juce::MouseEvent&)
 {
+    rcvoxTarget = 0;
     if (dragKnob != nullptr)
         if (auto* pr = proc.param (paramIndex (dragKnob->param))) pr->endChangeGesture();
     dragKnob = nullptr;
@@ -548,4 +569,130 @@ void PanelView::mouseWheelMove (const juce::MouseEvent& e, const juce::MouseWhee
         setKnobFromAngle (*k, juce::jlimit (lo, hi, a));
         repaint();
     }
+}
+
+// ================= RC-Vox : faders, vu-mètre, valeurs affichées =================
+// coordonnées en pixels de la façade (1536 x 1024)
+namespace rcv
+{
+    constexpr float gateTop = 255.6f, gatePx = 4.533f, gateBottom = 614.0f;   // 0 dB en haut, -79 en bas
+    constexpr float grTop = 241.6f, grPx = 10.07f;                              // vu-mètre : dB sous 0
+    constexpr float mX0 = 673, mX1 = 876, mY0 = 240, mY1 = 606;
+    constexpr float gainTop = 262.0f, gainBottom = 600.0f, gainMax = 12.0f, gainMin = -24.0f;
+    constexpr float outTop = 290.0f, outBottom = 617.0f;
+}
+
+static juce::String fmtDb (float v, int dec = 1)
+{
+    if (v <= -79.5f) return "-Inf";
+    return juce::String (v, dec);
+}
+
+void PanelView::paintRCVox (juce::Graphics& g, float s)
+{
+    using namespace rcv;
+    const auto v = proc.values();
+    auto P = [s] (float x, float y) { return juce::Point<float> (x * s, y * s); };
+    auto text = [&] (const juce::String& t, float cx, float cy, float size, bool semi, juce::Colour c, float w = 200)
+    {
+        g.setColour (c);
+        g.setFont (look::inter (size * s, semi));
+        g.drawText (t, juce::Rectangle<float> ((cx - w / 2) * s, (cy - size) * s, w * s, size * 2 * s), juce::Justification::centred);
+    };
+    const juce::Colour orange (0xfff59a16), ink (0xff2c2c2e), track (0xffd9d5cf);
+
+    // --- Gate (rail + énergie du signal + poignée) ---
+    const float inLvl = juce::jlimit (-79.0f, 0.0f, proc.inDb[0].load());
+    const float gate = juce::jlimit (-79.0f, 0.0f, v[pGate]);
+    {
+        juce::Rectangle<float> rail (397 * s, gateTop * s, 30 * s, (gateBottom - gateTop) * s);
+        g.setColour (track); g.fillRoundedRectangle (rail, 15 * s);
+        const float yIn = gateTop - inLvl * gatePx;
+        g.setColour (orange.withAlpha (0.92f));
+        g.fillRoundedRectangle (rail.withTop (juce::jmin (yIn * s, rail.getBottom() - 30 * s)), 15 * s);
+        const float yG = juce::jmin (gateBottom, gateTop - gate * gatePx);
+        juce::DropShadow (juce::Colours::black.withAlpha (0.25f), (int) (6 * s), { 0, (int) (2 * s) }).drawForPath (g, [&] { juce::Path p; p.addEllipse (388 * s, (yG - 24) * s, 48 * s, 48 * s); return p; }());
+        g.setColour (juce::Colours::white); g.fillEllipse (388 * s, (yG - 24) * s, 48 * s, 48 * s);
+        g.setColour (orange); g.drawEllipse (390 * s, (yG - 22) * s, 44 * s, 44 * s, 4.5f * s);
+        text (v[pGate] <= -79.5f ? "-Inf" : juce::String (v[pGate], 1), 406, 197, 32, true, ink);
+        text (juce::String (proc.inDb[0].load() <= -99 ? -100.0f : proc.inDb[0].load(), 1).replace ("-100.0", "-Inf"), 416, 690, 26, false, ink);
+    }
+
+    // --- Vu-mètre de compression ---
+    const float gr = juce::jmax (needle[0], needle[1]);           // dB de réduction (positif)
+    {
+        juce::Graphics::ScopedSaveState ss (g);
+        juce::Path clip; clip.addRoundedRectangle (mX0 * s, mY0 * s, (mX1 - mX0) * s, (mY1 - mY0) * s, 22 * s);
+        g.reduceClipRegion (clip);
+        const float yGr = juce::jlimit (mY0, mY1, grTop + gr * grPx);
+        g.setGradientFill (juce::ColourGradient (juce::Colour (0xffa8323c), 0, mY0 * s, juce::Colour (0xff7e1d26), 0, yGr * s, false));
+        g.fillRect (juce::Rectangle<float> (mX0 * s, mY0 * s, (mX1 - mX0) * s, (yGr - mY0) * s));
+    }
+    {
+        const float thr = juce::jlimit (-36.0f, 0.0f, v[pThreshold]);
+        const float y = juce::jlimit (mY0 + 20, mY1 - 20, grTop - thr * grPx);
+        g.setColour (orange);
+        g.fillRect (juce::Rectangle<float> (645 * s, (y - 3) * s, 260 * s, 6 * s));
+        juce::Rectangle<float> pill ((775 - 70) * s, (y - 28) * s, 140 * s, 56 * s);
+        juce::DropShadow (juce::Colours::black.withAlpha (0.45f), (int) (8 * s), { 0, (int) (2 * s) }).drawForRectangle (g, pill.toNearestInt());
+        g.setColour (orange); g.fillRoundedRectangle (pill, 28 * s);
+        g.setColour (juce::Colour (0xffe9e07a)); g.fillRoundedRectangle (pill.reduced (5 * s), 23 * s);
+        g.setColour (juce::Colour (0xff17324a)); g.fillRoundedRectangle (pill.reduced (8 * s), 20 * s);
+        text (juce::String (v[pThreshold], 1), 775, y, 30, false, juce::Colours::white);
+    }
+    text (gr > 0.05f ? juce::String (-gr, 1) : juce::String ("0.0"), 775, 672, 40, false, ink, 260);
+
+    // --- Gain (poignée) et niveaux de sortie ---
+    {
+        for (int c = 0; c < 2; ++c)
+        {
+            const float x = c == 0 ? 1106.0f : 1124.0f;
+            juce::Rectangle<float> bar (x * s, outTop * s, 12 * s, (outBottom - outTop) * s);
+            g.setColour (track); g.fillRoundedRectangle (bar, 3 * s);
+            const float lvl = juce::jlimit (-60.0f, 0.0f, proc.outDb[c].load());
+            const float y = outBottom - (lvl + 60.0f) / 60.0f * (outBottom - outTop);
+            g.setColour (orange); g.fillRoundedRectangle (bar.withTop (y * s), 3 * s);
+        }
+        const float gv = juce::jlimit (gainMin, gainMax, v[pOutput]);
+        const float y = gainTop + (gainMax - gv) / (gainMax - gainMin) * (gainBottom - gainTop);
+        juce::DropShadow (juce::Colours::black.withAlpha (0.25f), (int) (6 * s), { 0, (int) (2 * s) }).drawForPath (g, [&] { juce::Path p; p.addEllipse (1092 * s, (y - 28) * s, 56 * s, 56 * s); return p; }());
+        g.setColour (juce::Colours::white); g.fillEllipse (1092 * s, (y - 28) * s, 56 * s, 56 * s);
+        g.setColour (orange); g.drawEllipse (1094 * s, (y - 26) * s, 52 * s, 52 * s, 5 * s);
+        g.setColour (juce::Colour (0xff17324a));
+        g.fillRect (juce::Rectangle<float> (1108 * s, (y - 4) * s, 8 * s, 8 * s));
+        g.fillRect (juce::Rectangle<float> (1124 * s, (y - 4) * s, 8 * s, 8 * s));
+        text (juce::String (v[pOutput], 1), 1118, 196, 32, true, ink);
+        text (fmtDb (juce::jmax (-80.0f, proc.outDb[0].load())), 1088, 688, 26, false, ink, 90);
+        text (fmtDb (juce::jmax (-80.0f, proc.outDb[1].load())), 1158, 688, 26, false, ink, 90);
+    }
+
+    // --- valeurs sous les boutons du bas ---
+    auto ms = [] (float x) { return x >= 1000 ? juce::String (x / 1000, 2) + " s" : juce::String (x, x < 10 ? 1 : 0) + " ms"; };
+    text (juce::String (v[pThreshold], 1) + " dB", 158, 963, 26, false, ink);
+    text (juce::String (v[pRatio], 1) + " : 1", 372, 963, 26, false, ink);
+    text (ms (v[pAttack]), 588, 963, 26, false, ink);
+    text (ms (v[pRelease]), 802, 963, 26, false, ink);
+}
+
+bool PanelView::rcvoxDrag (juce::Point<float> pos, bool start)
+{
+    using namespace rcv;
+    const float s = sc();
+    const juce::Point<float> p (pos.x / s, pos.y / s);
+    if (start)
+    {
+        rcvoxTarget = 0;
+        if (p.x > 378 && p.x < 446 && p.y > 230 && p.y < 645) rcvoxTarget = 1;          // gate
+        else if (p.x > 645 && p.x < 905 && p.y > 236 && p.y < 610) rcvoxTarget = 2;     // seuil
+        else if (p.x > 1085 && p.x < 1160 && p.y > 228 && p.y < 632) rcvoxTarget = 3;   // gain
+        if (rcvoxTarget == 0) return false;
+    }
+    if (rcvoxTarget == 1)
+        proc.setValue (pGate, p.y >= gateBottom - 2 ? -80.0f : juce::jlimit (-79.0f, 0.0f, (gateTop - p.y) / gatePx));
+    else if (rcvoxTarget == 2)
+        proc.setValue (pThreshold, juce::jlimit (-36.0f, 0.0f, (grTop - p.y) / grPx));
+    else if (rcvoxTarget == 3)
+        proc.setValue (pOutput, juce::jlimit (gainMin, gainMax, gainMax - (p.y - gainTop) / (gainBottom - gainTop) * (gainMax - gainMin)));
+    repaint();
+    return true;
 }

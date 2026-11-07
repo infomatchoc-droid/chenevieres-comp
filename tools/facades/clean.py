@@ -104,7 +104,7 @@ def remove_needle(img, mask_poly_pts, pivot, tip, face_rect, dark_thr=90, arc_y=
 
 def run(model):
     cfg = json.load(open(f'layouts/{model}.json'))
-    img = cv2.imread(os.path.join(ORIG, f'{model}.png'))
+    img = cv2.imread(os.path.join(ORIG, cfg.get('source', model) + '.png'))
     os.makedirs(f'out/{model}', exist_ok=True)
     mask = np.zeros(img.shape[:2], np.uint8)
     info = {}

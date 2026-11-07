@@ -1,0 +1,393 @@
+{
+ "model": "rcvox",
+ "source": "rcvox_prep",
+ "knobs": [
+  {
+   "id": "threshold",
+   "param": "threshold",
+   "cx": 158,
+   "cy": 877,
+   "rs": 47,
+   "rptr": 42,
+   "cal": [
+    [
+     -60,
+     -135
+    ],
+    [
+     0,
+     135
+    ]
+   ],
+   "fmt": "{:.1f} dB",
+   "log": false,
+   "bands": 0,
+   "ptr_colour": "#2e2e30",
+   "ptr_w": 5,
+   "ptr_len": 37.6,
+   "ptr_in": 19.74,
+   "arc": [
+    56,
+    6
+   ]
+  },
+  {
+   "id": "ratio",
+   "param": "ratio",
+   "cx": 371,
+   "cy": 877,
+   "rs": 47,
+   "rptr": 42,
+   "cal": [
+    [
+     1,
+     -135
+    ],
+    [
+     20,
+     135
+    ]
+   ],
+   "fmt": "{:.1f} : 1",
+   "log": true,
+   "bands": 0,
+   "ptr_colour": "#2e2e30",
+   "ptr_w": 5,
+   "ptr_len": 37.6,
+   "ptr_in": 19.74,
+   "arc": [
+    56,
+    6
+   ]
+  },
+  {
+   "id": "attack",
+   "param": "attack",
+   "cx": 585,
+   "cy": 876,
+   "rs": 47,
+   "rptr": 42,
+   "cal": [
+    [
+     0.1,
+     -135
+    ],
+    [
+     100,
+     135
+    ]
+   ],
+   "fmt": "{:.1f} ms",
+   "log": true,
+   "bands": 0,
+   "ptr_colour": "#2e2e30",
+   "ptr_w": 5,
+   "ptr_len": 37.6,
+   "ptr_in": 19.74,
+   "arc": [
+    56,
+    6
+   ]
+  },
+  {
+   "id": "release",
+   "param": "release",
+   "cx": 802,
+   "cy": 877,
+   "rs": 47,
+   "rptr": 42,
+   "cal": [
+    [
+     10,
+     -135
+    ],
+    [
+     1000,
+     135
+    ]
+   ],
+   "fmt": "{:.0f} ms",
+   "log": true,
+   "bands": 0,
+   "ptr_colour": "#2e2e30",
+   "ptr_w": 5,
+   "ptr_len": 37.6,
+   "ptr_in": 19.74,
+   "arc": [
+    56,
+    6
+   ]
+  },
+  {
+   "id": "knee",
+   "param": "knee",
+   "cx": 1022,
+   "cy": 877,
+   "rs": 47,
+   "rptr": 42,
+   "cal": [
+    [
+     24,
+     -135
+    ],
+    [
+     0,
+     135
+    ]
+   ],
+   "fmt": "{:.0f} dB",
+   "log": false,
+   "bands": 0,
+   "ptr_colour": "#2e2e30",
+   "ptr_w": 5,
+   "ptr_len": 37.6,
+   "ptr_in": 19.74,
+   "arc": [
+    56,
+    6
+   ]
+  },
+  {
+   "id": "deessf",
+   "param": "deessfreq",
+   "cx": 1389,
+   "cy": 878,
+   "rs": 47,
+   "rptr": 42,
+   "cal": [
+    [
+     2000,
+     -135
+    ],
+    [
+     10000,
+     135
+    ]
+   ],
+   "fmt": "{:.0f} Hz",
+   "log": true,
+   "bands": 0,
+   "ptr_colour": "#2e2e30",
+   "ptr_w": 5,
+   "ptr_len": 37.6,
+   "ptr_in": 19.74,
+   "arc": [
+    56,
+    6
+   ]
+  },
+  {
+   "id": "mix",
+   "param": "mix",
+   "cx": 1376,
+   "cy": 219,
+   "rs": 37,
+   "rptr": 33,
+   "cal": [
+    [
+     0,
+     -135
+    ],
+    [
+     100,
+     135
+    ]
+   ],
+   "fmt": "{:.0f} %",
+   "log": false,
+   "bands": 0,
+   "ptr_colour": "#2e2e30",
+   "ptr_w": 5,
+   "ptr_len": 29.6,
+   "ptr_in": 15.54,
+   "arc": [
+    44,
+    6
+   ]
+  },
+  {
+   "id": "hpf",
+   "param": "schpf",
+   "cx": 1377,
+   "cy": 405,
+   "rs": 37,
+   "rptr": 33,
+   "cal": [
+    [
+     40,
+     -135
+    ],
+    [
+     200,
+     135
+    ]
+   ],
+   "fmt": "{:.0f} Hz",
+   "log": true,
+   "bands": 0,
+   "ptr_colour": "#2e2e30",
+   "ptr_w": 5,
+   "ptr_len": 29.6,
+   "ptr_in": 15.54,
+   "arc": [
+    44,
+    6
+   ]
+  },
+  {
+   "id": "air",
+   "param": "air",
+   "cx": 1377,
+   "cy": 601,
+   "rs": 37,
+   "rptr": 33,
+   "cal": [
+    [
+     0,
+     -135
+    ],
+    [
+     100,
+     135
+    ]
+   ],
+   "fmt": "{:.0f} %",
+   "log": false,
+   "bands": 0,
+   "ptr_colour": "#2e2e30",
+   "ptr_w": 5,
+   "ptr_len": 29.6,
+   "ptr_in": 15.54,
+   "arc": [
+    44,
+    6
+   ]
+  }
+ ],
+ "texts": [
+  {
+   "x": 649.2,
+   "y": 68,
+   "size": 70,
+   "font": "Inter-BlackItalic.otf",
+   "parts": [
+    [
+     "RC-",
+     [
+      102,
+      103,
+      104
+     ]
+    ],
+    [
+     "Vox",
+     [
+      197,
+      39,
+      32
+     ]
+    ]
+   ]
+  }
+ ],
+ "buttons": [
+  {
+   "id": "mode",
+   "param": "voxmode",
+   "values": [
+    0,
+    1,
+    2,
+    3
+   ],
+   "labels": [
+    "Vox",
+    "Clean",
+    "Smooth",
+    "Punch"
+   ],
+   "lit_in_source": 0,
+   "unlit_light": true,
+   "rects": [
+    [
+     69,
+     214,
+     165,
+     62
+    ],
+    [
+     69,
+     318,
+     165,
+     62
+    ],
+    [
+     69,
+     409,
+     165,
+     62
+    ],
+    [
+     69,
+     500,
+     165,
+     62
+    ]
+   ],
+   "font": 26,
+   "glow": 14,
+   "label_font": "Inter-Medium.otf",
+   "label_on": [
+    38,
+    30,
+    22
+   ],
+   "label_off": [
+    44,
+    44,
+    46
+   ]
+  },
+  {
+   "id": "deess",
+   "param": "deess",
+   "values": [
+    1
+   ],
+   "off": 0,
+   "toggle": true,
+   "labels": [
+    "ON"
+   ],
+   "lit_in_source": 0,
+   "rects": [
+    [
+     1205,
+     852,
+     90,
+     54
+    ]
+   ],
+   "unlit_rect": [
+    69,
+    318,
+    165,
+    62
+   ],
+   "unlit_light": true,
+   "font": 26,
+   "glow": 14,
+   "label_font": "Inter-SemiBold.otf",
+   "label_on": [
+    38,
+    30,
+    22
+   ],
+   "label_off": [
+    44,
+    44,
+    46
+   ]
+  }
+ ]
+}
