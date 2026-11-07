@@ -165,6 +165,13 @@ def run(model):
         mm = cv2.dilate(sel.astype(np.uint8) * 255, np.ones((7, 7), np.uint8))
         mask |= mm
     clean = cv2.inpaint(img, mask, 5, cv2.INPAINT_TELEA)
+    for e in cfg.get('mirror_fill', []):   # zone refaite en miroir horizontal autour de axis (cadrans symétriques)
+        x0, y0, x1, y1 = e['rect']; ax = e['axis']
+        src_cols = [int(round(2 * ax - x)) for x in range(x0, x1)]
+        patch = clean[y0:y1][:, src_cols].astype(np.float32)
+        m = np.ones((y1 - y0, x1 - x0), np.float32)
+        m = cv2.GaussianBlur(np.pad(m, 6), (0, 0), 3)[6:-6, 6:-6][..., None]
+        clean[y0:y1, x0:x1] = (patch * m + clean[y0:y1, x0:x1].astype(np.float32) * (1 - m)).astype(np.uint8)
     for e in cfg.get('tile_fill', []):   # zone refaite en répétant des colonnes propres (plaques, cadres)
         x0, y0, x1, y1 = e['rect']; s0, s1 = e['from']
         strip = img[y0:y1, s0:s1]
@@ -247,6 +254,11 @@ def run(model):
             dst = bg[ay0:ay1, ax0 + dx:ax1 + dx]
             bg[ay0:ay1, ax0 + dx:ax1 + dx] = dst * (1 - a) + src * a
         clean = np.clip(bg, 0, 255).astype(np.uint8)
+    for e in cfg.get('lerp_fill', []):   # zone refaite par interpolation horizontale entre ses bords (fonds dégradés)
+        x0, y0, x1, y1 = e['rect']
+        Lc = clean[y0:y1, x0 - 1].astype(np.float32); Rc = clean[y0:y1, x1].astype(np.float32)
+        t = np.linspace(0, 1, x1 - x0)[None, :, None]
+        clean[y0:y1, x0:x1] = (Lc[:, None] * (1 - t) + Rc[:, None] * t).astype(np.uint8)
     cv2.imwrite(f'out/{model}/panel.png', clean)
     cv2.imwrite(f'out/{model}/mask.png', mask)
     json.dump(info, open(f'out/{model}/info.json', 'w'), indent=1)

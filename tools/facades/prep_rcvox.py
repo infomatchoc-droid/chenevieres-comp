@@ -45,6 +45,22 @@ def main():
     mask = cv2.dilate(mask, np.ones((5, 5), np.uint8))
     out = cv2.inpaint(out, mask, 5, cv2.INPAINT_TELEA)
 
+    # 2 bis) capuchons lissés : médiane glissante sur l'angle (efface les traces locales, garde l'éclairage)
+    for pts, cap, fac in [(BOTTOM, CAP_B, 1.1), (RIGHT, CAP_R, 1.22)]:
+        for cx, cy in pts:
+            R = int(cap * fac); NA = 720
+            crop = out[cy - R:cy + R + 1, cx - R:cx + R + 1].astype(np.float32)
+            pol = cv2.warpPolar(crop, (R * 2, NA), (R, R), R, cv2.WARP_POLAR_LINEAR + cv2.INTER_CUBIC)
+            k = NA // 8
+            ext = np.concatenate([pol[-k:], pol, pol[:k]], axis=0)
+            from scipy.ndimage import median_filter
+            sm = median_filter(ext, size=(2 * k + 1, 1, 1))[k:-k]
+            back = np.nan_to_num(cv2.warpPolar(sm, (crop.shape[1], crop.shape[0]), (R, R), R, cv2.WARP_POLAR_LINEAR + cv2.INTER_LINEAR + cv2.WARP_INVERSE_MAP), nan=0.0)
+            yy2, xx2 = np.mgrid[0:crop.shape[0], 0:crop.shape[1]]
+            d = np.hypot(xx2 - R, yy2 - R)
+            a = np.clip((R - 3 - d) / 3, 0, 1)[..., None]
+            out[cy - R:cy + R + 1, cx - R:cx + R + 1] = np.clip(back * a + crop * (1 - a), 0, 255).astype(np.uint8)
+
     # 3) valeurs affichées, faders, ligne de seuil
     mask = np.zeros((H, W), np.uint8)
     VALUES = [(100, 948, 216, 978), (330, 948, 414, 978), (545, 948, 630, 978), (720, 948, 856, 978),
