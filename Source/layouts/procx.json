@@ -437,7 +437,11 @@
    "fmt": "{:+.1f} dB",
    "ptr_in": 5,
    "steps": [],
-   "rotate": null
+   "rotate": null,
+   "arc": [
+    0,
+    0
+   ]
   },
   {
    "type": "knob",
@@ -481,7 +485,11 @@
    "fmt": "{:.1f} dB",
    "ptr_in": 5,
    "steps": [],
-   "rotate": null
+   "rotate": null,
+   "arc": [
+    0,
+    0
+   ]
   },
   {
    "type": "knob",
@@ -533,7 +541,11 @@
    "fmt": "{:.1f}:1",
    "ptr_in": 5,
    "steps": [],
-   "rotate": null
+   "rotate": null,
+   "arc": [
+    0,
+    0
+   ]
   },
   {
    "type": "knob",
@@ -565,7 +577,11 @@
    "fmt": "{:.0f} dB",
    "ptr_in": 5,
    "steps": [],
-   "rotate": null
+   "rotate": null,
+   "arc": [
+    0,
+    0
+   ]
   },
   {
    "type": "knob",
@@ -613,7 +629,11 @@
    "fmt": "{:.2f} ms",
    "ptr_in": 5,
    "steps": [],
-   "rotate": null
+   "rotate": null,
+   "arc": [
+    0,
+    0
+   ]
   },
   {
    "type": "knob",
@@ -665,7 +685,11 @@
    "fmt": "{:.0f} ms",
    "ptr_in": 5,
    "steps": [],
-   "rotate": null
+   "rotate": null,
+   "arc": [
+    0,
+    0
+   ]
   },
   {
    "type": "knob",
@@ -725,7 +749,11 @@
    "fmt": "{:+.1f} dB",
    "ptr_in": 5,
    "steps": [],
-   "rotate": null
+   "rotate": null,
+   "arc": [
+    0,
+    0
+   ]
   },
   {
    "type": "knob",
@@ -775,7 +803,11 @@
     200,
     400
    ],
-   "rotate": null
+   "rotate": null,
+   "arc": [
+    0,
+    0
+   ]
   },
   {
    "type": "knob",
@@ -807,7 +839,11 @@
    "fmt": "{:.0f} %",
    "ptr_in": 3,
    "steps": [],
-   "rotate": null
+   "rotate": null,
+   "arc": [
+    0,
+    0
+   ]
   }
  ]
 }

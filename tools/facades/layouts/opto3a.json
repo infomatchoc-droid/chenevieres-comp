@@ -168,7 +168,11 @@
    "ptr_colour": "#e9e6e0",
    "ptr_w": 5,
    "ptr_len": 40,
-   "ptr_in": 5
+   "ptr_in": 5,
+   "erase_at": [
+    58,
+    13
+   ]
   }
  ],
  "meters": [

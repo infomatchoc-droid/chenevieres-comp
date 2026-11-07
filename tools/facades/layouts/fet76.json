@@ -58,7 +58,11 @@
    "ptr_colour": "#1a1a1c",
    "ptr_w": 7,
    "ptr_len": 80,
-   "ptr_in": 26.7
+   "ptr_in": 26.7,
+   "erase_at": [
+    50,
+    10
+   ]
   },
   {
    "id": "output",
@@ -85,7 +89,11 @@
    "ptr_colour": "#1a1a1c",
    "ptr_w": 7,
    "ptr_len": 80,
-   "ptr_in": 27.0
+   "ptr_in": 27.0,
+   "erase_at": [
+    48,
+    10
+   ]
   },
   {
    "id": "attack",
@@ -109,7 +117,11 @@
    "ptr_colour": "#1a1a1c",
    "ptr_w": 4,
    "ptr_len": 40,
-   "ptr_in": 12.9
+   "ptr_in": 12.9,
+   "erase_at": [
+    59,
+    10
+   ]
   },
   {
    "id": "release",
@@ -133,7 +145,13 @@
    "ptr_colour": "#1a1a1c",
    "ptr_w": 4,
    "ptr_len": 41,
-   "ptr_in": 13.2
+   "ptr_in": 13.2,
+   "erase_at": [
+    56,
+    12,
+    -127,
+    12
+   ]
   },
   {
    "id": "mix",
@@ -156,7 +174,11 @@
    "ptr_colour": "#1a1a1c",
    "ptr_w": 4,
    "ptr_len": 40,
-   "ptr_in": 12.9
+   "ptr_in": 12.9,
+   "erase_at": [
+    58,
+    10
+   ]
   }
  ],
  "meters": [

@@ -69,7 +69,8 @@ def knob_sprite(img, cx, cy, rs, rptr, bands=1, erase_at=None):
     if bands == 0:
         pass
     elif erase_at:
-        pol = remove_band_at(pol, NA, sc, erase_at[0], erase_at[1])
+        for i in range(0, len(erase_at), 2):
+            pol = remove_band_at(pol, NA, sc, erase_at[i], erase_at[i + 1])
     else:
         for _ in range(bands):
             pol = remove_band(pol, NA, sc, rptr)

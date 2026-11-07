@@ -31,7 +31,8 @@
    "toggle": false,
    "also": [],
    "off": null,
-   "lit_above": null
+   "lit_above": null,
+   "unless": null
   },
   {
    "type": "led",
@@ -154,7 +155,12 @@
    "ptr_colour": "#e9e6e0",
    "fmt": "{:+.1f} dB",
    "ptr_in": 8,
-   "steps": []
+   "steps": [],
+   "rotate": null,
+   "arc": [
+    0,
+    0
+   ]
   },
   {
    "type": "knob",
@@ -221,7 +227,12 @@
    "ptr_colour": "#e9e6e0",
    "fmt": "{:.1f}",
    "ptr_in": 8,
-   "steps": []
+   "steps": [],
+   "rotate": null,
+   "arc": [
+    0,
+    0
+   ]
   },
   {
    "type": "knob",
@@ -252,7 +263,12 @@
    "ptr_colour": "#e9e6e0",
    "fmt": "{:.0f} %",
    "ptr_in": 5,
-   "steps": []
+   "steps": [],
+   "rotate": null,
+   "arc": [
+    0,
+    0
+   ]
   },
   {
    "type": "needle",
